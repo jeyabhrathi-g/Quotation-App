@@ -1,0 +1,101 @@
+{
+  "quotations": {
+    "columns": [
+      "id",
+      "customer_id",
+      "total",
+      "status",
+      "created_at",
+      "quotation_no",
+      "qty",
+      "rate",
+      "cgst",
+      "sgst",
+      "discount",
+      "quotation_date",
+      "expiry_date",
+      "product_id",
+      "pdf_url",
+      "items"
+    ],
+    "sample": {
+      "id": "fca65a60-1fba-433e-b1a0-cc2aaa898716",
+      "customer_id": "e79fa440-51b0-40ef-875a-a326073cd0da",
+      "total": 165.2,
+      "status": "Closed",
+      "created_at": "2026-03-20T08:03:47.074314+00:00",
+      "quotation_no": "SSV-03-26-Q016",
+      "qty": null,
+      "rate": null,
+      "cgst": 9,
+      "sgst": 9,
+      "discount": 0,
+      "quotation_date": "2026-03-20",
+      "expiry_date": "2026-04-04",
+      "product_id": null,
+      "pdf_url": null,
+      "items": "[{\"desc\":\"Testing - test\",\"qty\":1,\"rate\":140,\"amount\":140}]"
+    }
+  },
+  "quotation_items": {
+    "error": "Could not find the table 'public.quotation_items' in the schema cache"
+  },
+  "products": {
+    "columns": [
+      "id",
+      "category",
+      "rate",
+      "created_at",
+      "sub_category",
+      "phase",
+      "rpm",
+      "steel",
+      "Description",
+      "energy"
+    ],
+    "sample": {
+      "id": "81a09f9e-1874-4239-a397-f3dc6f32149c",
+      "category": "Test\n",
+      "rate": 230,
+      "created_at": "2026-03-22T14:15:41.15705+00:00",
+      "sub_category": "Testing",
+      "phase": 12,
+      "rpm": 12,
+      "steel": "MS",
+      "Description": "testing.....",
+      "energy": "Gas"
+    }
+  },
+  "customers": {
+    "columns": [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "created_at",
+      "address",
+      "gst_number"
+    ],
+    "sample": {
+      "id": "47c4787a-32e1-4568-add7-ad51de8b802d",
+      "name": "JEYA BHARATHI G",
+      "email": "gsjeyabharathi@gmail.com",
+      "phone": "1234124131",
+      "created_at": "2026-03-16T06:04:06.993693+00:00",
+      "address": "1/53, North Street\nKaruvantha",
+      "gst_number": null
+    }
+  },
+  "category": {
+    "columns": [
+      "id",
+      "created_at",
+      "category_name"
+    ],
+    "sample": {
+      "id": 14,
+      "created_at": "2026-03-29T05:48:26.303392+00:00",
+      "category_name": "Test\n"
+    }
+  }
+}

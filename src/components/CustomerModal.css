@@ -1,0 +1,225 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 640px;
+  border-radius: 32px;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  padding: 32px 40px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header-title h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.header-title p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 4px 0 0;
+}
+
+.close-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+  display: flex;
+}
+
+.close-btn:hover {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fee2e2;
+}
+
+.modal-form {
+  padding: 40px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-icon {
+  position: absolute;
+  left: 18px;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.input-with-icon input, 
+.input-with-icon textarea {
+  width: 100%;
+  padding: 14px 20px 14px 50px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.input-with-icon.textarea {
+  align-items: flex-start;
+}
+
+.input-with-icon.textarea .field-icon {
+  top: 16px;
+}
+
+.input-with-icon input:focus, 
+.input-with-icon textarea:focus {
+  border-color: #4f46e5;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.input-with-icon input:focus + .field-icon,
+.input-with-icon textarea:focus + .field-icon {
+  color: #4f46e5;
+}
+
+.has-error .input-with-icon input,
+.has-error .input-with-icon textarea {
+  border-color: #ef4444;
+  background: #fffafa;
+}
+
+.error-hint {
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.top-error-message {
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+  padding: 14px 20px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  margin-bottom: 32px;
+}
+
+.modal-footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.cancel-modal-btn {
+  padding: 14px 28px;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-modal-btn:hover {
+  background: #f8fafc;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.submit-modal-btn {
+  padding: 14px 28px;
+  border-radius: 16px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.25);
+}
+
+.submit-modal-btn:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 20px -5px rgba(79, 70, 229, 0.35);
+}
+
+.submit-modal-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}

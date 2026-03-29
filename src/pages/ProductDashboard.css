@@ -1,0 +1,290 @@
+.product-avatar {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+.action-buttons-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.add-category-btn,
+.add-product-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  height: 52px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.add-category-btn {
+  background-color: #1e293b;
+  color: white;
+}
+
+.add-category-btn:hover {
+  background-color: #0f172a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.add-product-btn {
+  background-color: #00a870;
+  color: white;
+}
+
+.add-product-btn:hover {
+  background-color: #008f5d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 168, 112, 0.2);
+}
+
+/* Product Table specific dimensions */
+.product-table .table-header,
+.product-row {
+  grid-template-columns: 1fr 1.8fr 1.5fr 1.2fr 1fr 0.7fr !important;
+  gap: 20px;
+}
+
+.cat-col {
+  flex: 1;
+}
+
+.name-col {
+  flex: 1.8;
+}
+
+.specs-col {
+  flex: 1.5;
+}
+
+.steel-col {
+  flex: 1.2;
+}
+
+.rate-col {
+  flex: 1;
+  text-align: right;
+  margin-right: 30px;
+}
+
+.actions-col {
+  flex: 0.7;
+  text-align: center;
+}
+
+.category-tag-badge {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.2px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.product-name-bold {
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.specs-text,
+.steel-energy-text {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.steel-energy-text .separator {
+  color: #cbd5e1;
+  margin: 0 4px;
+}
+
+.rate-text-green {
+  color: #00a870;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.action-buttons-list {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.icon-btn-edit-small {
+  background: none;
+  border: none;
+  color: #6366f1;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s;
+}
+
+.icon-btn-delete-small {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  transition: all 0.2s;
+}
+
+.icon-btn-edit-small:hover {
+  color: #4f46e5;
+  transform: scale(1.1);
+}
+
+.icon-btn-delete-small:hover {
+  color: #dc2626;
+  transform: scale(1.1);
+}
+
+/* Header style mimics */
+.product-catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-controls-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.sync-badge {
+  background: #f0fdf4;
+  color: #16a34a;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #dcfce7;
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+.clock-container-large {
+  text-align: right;
+}
+
+/* Modal form overrides for better matching */
+.modal-select-field,
+.modal-input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 1rem;
+  color: #1e293b;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+}
+
+.modal-select-field:focus,
+.modal-input-field:focus {
+  border-color: #6366f1;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  outline: none;
+}
+
+/* Delete Modal Styles */
+.delete-overlay {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.delete-modal-content {
+  max-width: 400px !important;
+  text-align: center;
+  padding: 40px !important;
+  border-radius: 24px !important;
+}
+
+.warning-icon-box {
+  background: #fef2f2;
+  color: #ef4444;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.delete-modal-header h3 {
+  font-size: 1.25rem;
+  color: #1e293b;
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+.delete-modal-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.delete-modal-actions button {
+  padding: 12px 30px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.delete-modal-actions .no-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.delete-modal-actions .no-btn:hover {
+  background: #e2e8f0;
+}
+
+.delete-modal-actions .yes-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.delete-modal-actions .yes-btn:hover {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}

@@ -1,0 +1,133 @@
+.sidebar-nav {
+  height: 100vh;
+  width: 280px;
+  background: white;
+  border-right: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.sidebar-collapsed {
+  width: 90px;
+}
+
+.sidebar-brand {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.brand-text {
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #1e293b;
+  white-space: nowrap;
+  letter-spacing: -0.5px;
+}
+
+.sidebar-toggle {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.nav-menu {
+  padding: 32px 14px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #64748b;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 16px;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover {
+  background: #f8fafc;
+  color: #2563eb;
+}
+
+.nav-active {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  font-weight: 700;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.05);
+  border-color: rgba(37, 99, 235, 0.1);
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.sidebar-footer {
+  padding: 24px 14px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logout-nav {
+  background: transparent;
+  width: 100%;
+  border: 1px solid transparent;
+  justify-content: flex-start;
+}
+
+.logout-nav:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.sidebar-collapsed .nav-link {
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-collapsed .nav-label {
+  display: none;
+}
