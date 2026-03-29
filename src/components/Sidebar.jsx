@@ -14,7 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import './Sidebar.css';
 
-const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen }) => {
   const { role, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -32,8 +32,14 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   const menuItems = role === 'admin' ? adminMenu : userMenu;
 
+  const mobileStateClass = isMobile
+    ? isMobileSidebarOpen
+      ? 'sidebar-mobile-open'
+      : 'sidebar-mobile-hidden'
+    : '';
+
   return (
-    <aside className={`sidebar-nav ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+    <aside className={`sidebar-nav ${isCollapsed ? 'sidebar-collapsed' : ''} ${mobileStateClass}`}>
       <div className="sidebar-brand">
         {!isCollapsed && <span className="brand-text">SSV Food Tech</span>}
         <button 

@@ -219,3 +219,61 @@
   color: #64748b;
   font-weight: 600;
 }
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content-wrapper {
+    height: auto;
+  }
+
+  .page-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .content-search-box {
+    max-width: 100%;
+  }
+
+  .register-btn,
+  .icon-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .table-row {
+    display: block;
+    grid-template-columns: unset;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .table-row > * {
+    width: 100%;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .avatar,
+  .gst-badge,
+  .action-buttons {
+    margin-top: 8px;
+  }
+
+  .page-content-scroll {
+    padding: 8px;
+  }
+}

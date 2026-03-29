@@ -20,7 +20,14 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-main);
   color: var(--text-main);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-width: 320px;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
 }
 
 h1,
