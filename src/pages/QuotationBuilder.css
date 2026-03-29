@@ -322,3 +322,95 @@
 .amount-text.blue {
   color: #4f46e5;
 }
+
+@media (max-width: 768px) {
+  .builder-container {
+    height: auto;
+    padding-bottom: 36px;
+  }
+
+  .builder-header {
+    padding: 16px;
+  }
+
+  .builder-main {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 14px 20px;
+  }
+
+  .builder-panel,
+  .items-list-box,
+  .calc-box {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .form-input,
+  .form-select {
+    width: 100%;
+  }
+
+  .item-add-box {
+    width: 100%;
+    padding: 18px;
+  }
+
+  .action-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .save-draft-btn,
+  .save-pdf-btn,
+  .add-item-btn {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 14px;
+  }
+
+  .items-list-box {
+    height: auto;
+    max-height: 56vh;
+  }
+
+  .items-header,
+  .item-row {
+    display: block;
+    grid-template-columns: unset;
+  }
+
+  .items-header {
+    display: none;
+  }
+
+  .item-row {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
+  }
+
+  .item-row > * {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .action-buttons {
+    justify-content: flex-end;
+    gap: 10px;
+  }
+}

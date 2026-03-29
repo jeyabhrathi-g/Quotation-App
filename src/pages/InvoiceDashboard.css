@@ -172,3 +172,71 @@
   font-weight: 600;
   font-size: 0.95rem;
 }
+
+.inv-table-card {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .inv-wrapper {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .inv-stats {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .inv-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .inv-search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .inv-table-header,
+  .inv-table-row {
+    display: block;
+    grid-template-columns: unset;
+    padding: 12px;
+  }
+
+  .inv-table-header {
+    display: none;
+  }
+
+  .inv-table-row {
+    background-color: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    margin-bottom: 12px;
+  }
+
+  .inv-table-row > * {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 0.9rem;
+  }
+
+  .inv-view-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .inv-inv-no,
+  .inv-quote-no,
+  .inv-customer,
+  .inv-date,
+  .inv-amount {
+    text-align: left;
+    width: 100%;
+  }
+}
+

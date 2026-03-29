@@ -35,7 +35,16 @@
   .header-actions {
     width: 100%;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .page-title-display h1 {
+    font-size: 1.25rem;
+  }
+
+  .page-title-display .subtitle {
+    font-size: 0.7rem;
   }
 
   .user-profile-summary {
