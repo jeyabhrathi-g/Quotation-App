@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, Search, TrendingUp, CheckCircle } from 'lucide-react';
+import { FileText, Download, Search, TrendingUp, CheckCircle, Eye } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import './InvoiceDashboard.css';
@@ -65,6 +65,14 @@ const InvoiceDashboard = () => {
         // Fallback: open in new tab if download fails
         window.open(url, '_blank');
       }
+    } else {
+      alert('PDF URL not available for this invoice.');
+    }
+  };
+
+  const handleViewPDF = (url) => {
+    if (url) {
+      window.open(url, '_blank');
     } else {
       alert('PDF URL not available for this invoice.');
     }
@@ -148,9 +156,16 @@ const InvoiceDashboard = () => {
                   : new Date(inv.created_at).toLocaleDateString('en-GB')}
               </div>
               <div className="inv-amount" data-label="Amount">₹{Math.round(inv.total || 0).toLocaleString('en-IN')}</div>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                 <button
                   className="inv-view-btn"
+                  onClick={() => handleViewPDF(inv.invoice_pdf_url)}
+                  title="View Invoice PDF"
+                >
+                  <Eye size={14} /> View
+                </button>
+                <button
+                  className="inv-download-btn"
                   onClick={() => handleDownloadPDF(inv.invoice_pdf_url, inv.invoice_no)}
                   title="Download Invoice PDF"
                 >
