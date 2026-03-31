@@ -52,41 +52,41 @@ const Layout = ({ children }) => {
         />
 
         <main className="main-wrapper">
-          <header className="dashboard-header">
-            {isMobile && (
-              <button
-                className="mobile-menu-toggle"
-                onClick={() => {
-                  setIsMobileSidebarOpen(!isMobileSidebarOpen);
-                  setIsSidebarCollapsed(isMobileSidebarOpen);
-                }}
-                aria-label="Toggle navigation"
-              >
-                {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
-            )}
-            <div className="header-title-section">
+          <header className="dashboard-header dashboard-header-aligned">
+            <div className="header-left header-left-aligned">
+              {isMobile && (
+                <button
+                  className="mobile-menu-toggle"
+                  onClick={() => {
+                    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+                    setIsSidebarCollapsed(isMobileSidebarOpen);
+                  }}
+                  aria-label="Toggle navigation"
+                >
+                  {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              )}
               {pageTitle.main && (
                 <div className="page-title-display">
-                  <h1>{pageTitle.main}</h1>
-                  <p className="subtitle">{pageTitle.sub}</p>
+                  <h1 className="title-text-main">{pageTitle.main}</h1>
+                  {pageTitle.sub && <p className="page-subtitle subtitle-text-main">{pageTitle.sub}</p>}
                 </div>
               )}
             </div>
 
             <div className="header-actions">
-              <LiveClock />
-              <div className="status-badge">
-                <span className="dot"></span>
-                Cloud Sync Active
+              <div className="status-badge header-badge">
+                <span className="dot dot-live"></span>
+                Live
               </div>
+              <LiveClock />
               <div className="user-profile-summary">
                 <div className="user-info">
                   <span className="username">{user?.username}</span>
                   <span className="role">{user?.role}</span>
                 </div>
-                <button className="logout-btn" onClick={logout} title="Logout">
-                  <LogOut size={20} />
+                <button className="logout-btn header-logout-btn" onClick={logout} title="Logout">
+                  <LogOut size={18} />
                 </button>
               </div>
             </div>

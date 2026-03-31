@@ -11,11 +11,13 @@ import {
   Settings
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useAppContext } from '../context/AppContext';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import './Sidebar.css';
 
 const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen }) => {
   const { role, logout } = useAuth();
+  const { appName } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -41,7 +43,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen })
   return (
     <aside className={`sidebar-nav ${isCollapsed ? 'sidebar-collapsed' : ''} ${mobileStateClass}`}>
       <div className="sidebar-brand">
-        {!isCollapsed && <span className="brand-text">SSV Food Tech</span>}
+        {!isCollapsed && <span className="brand-text">{appName}</span>}
         <button 
           className="sidebar-toggle" 
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -65,10 +67,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen })
       </nav>
 
       <div className="sidebar-footer">
-        <div className="nav-link settings">
+        <Link to="/settings" className={`nav-link settings ${location.pathname === '/settings' ? 'nav-active' : ''}`}>
           <span className="nav-icon"><Settings size={22} /></span>
           {!isCollapsed && <span className="nav-label">Settings</span>}
-        </div>
+        </Link>
         <button className="nav-link logout-nav" onClick={logout}>
           <span className="nav-icon"><LogOut size={22} /></span>
           {!isCollapsed && <span className="nav-label">Logout</span>}

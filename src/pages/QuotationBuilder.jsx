@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Edit, Plus, FileText, CheckCircle, Trash2, List } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { useAppContext } from '../context/AppContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import './QuotationBuilder.css';
@@ -9,6 +10,7 @@ import './QuotationBuilder.css';
 const QuotationBuilder = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { appName } = useAppContext();
 
   // Reference Data
   const [customers, setCustomers] = useState([]);
@@ -154,20 +156,6 @@ const QuotationBuilder = () => {
     setItems(items.filter(i => i.id !== itemId));
   };
 
-  const editItem = (itemId) => {
-    const itemToEdit = items.find(i => i.id === itemId);
-    if (!itemToEdit) return;
-    
-    setDraftDesc(itemToEdit.desc);
-    setDraftQty(itemToEdit.qty);
-    setDraftRate(itemToEdit.rate);
-    setDraftCgst(itemToEdit.cgst_pct);
-    setDraftSgst(itemToEdit.sgst_pct);
-    setDraftProduct(itemToEdit.product_id || '');
-    
-    removeItem(itemId);
-  };
-
   const calcTotals = () => {
     let subtotal = 0;
     let taxTotal = 0;
@@ -274,7 +262,7 @@ const QuotationBuilder = () => {
     // Header
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('SSV Food Technology', 105, 15, { align: 'center' });
+    doc.text(appName, 105, 15, { align: 'center' });
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.text('1/145A,Sarogini Nagar,Kalaikoil Nagar,Krishnapuram,Tirunelveli-627011 | GSTIN: 33SSVXP5865Q1ZJ', 105, 20, { align: 'center' });
@@ -414,10 +402,10 @@ const QuotationBuilder = () => {
       theme: 'grid',
       styles: { fontSize: 7, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
       body: [
-        [{ content: 'Terms and Condition', styles: { fontStyle: 'bold'} }, { content: 'Authorized Signatory For SSV Food Technology', styles: { fontStyle: 'bold', halign: 'center' } }],
+        [{ content: 'Terms and Condition', styles: { fontStyle: 'bold'} }, { content: `Authorized Signatory For ${appName}`, styles: { fontStyle: 'bold', halign: 'center' } }],
         [
           { content: `Payment Terms: 50% advance along with purchase order and 50% before dispatch.\nDelivery Period: 30 working days from the date of advance payment confirmation.\nGST: GST will be charged extra as applicable (CGST + SGST / IGST).\nTransportation: Transportation charges will be extra at actuals.\nWarranty: 6 months warranty on motor against manufacturing defects (excluding wear & tear parts).\nCancellation: Advance payment is non-refundable once production is started.\nForce Majeure: Delivery may be delayed due to circumstances beyond our control.\nJurisdiction: All disputes are subject to Chennai jurisdiction only. Damage or Shortage Of Good in Transit.` },
-          { content: `\n\n\n\nSathya R,\nSSV Food Technology`, styles: { halign: 'center', valign: 'bottom' } }
+          { content: `\n\n\n\nSathya R,\n${appName}`, styles: { halign: 'center', valign: 'bottom' } }
         ]
       ],
       columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 'auto' } }
@@ -484,7 +472,7 @@ const QuotationBuilder = () => {
     <div className="builder-container">
       <div className="builder-header">
         <button className="back-link" onClick={() => navigate('/quotations')}>
-          <ArrowLeft size={16} /> Back to Quotations
+          <ArrowLeft size={16} /> <span>Back to Quotations</span>
         </button>
       </div>
 
@@ -492,7 +480,7 @@ const QuotationBuilder = () => {
         {/* LEFT PANEL */}
         <div className="builder-panel">
           <div className="panel-header">
-            <h2 className="panel-title"><Edit size={20} color="#4f46e5" /> Builder Controls</h2>
+            <h2 className="panel-title"><Edit size={20} /> Builder Controls</h2>
             <span className="badge-auto">{currentQuoteNo || 'AUTO-GENERATED'}</span>
           </div>
 
@@ -516,7 +504,7 @@ const QuotationBuilder = () => {
           </div>
 
           <div className="item-add-box">
-            <div className="form-label" style={{ color: '#64748b' }}>ADD ITEM TO LIST</div>
+            <div className="form-label" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', letterSpacing: '0.05em' }}>ADD ITEM TO LIST</div>
 
             <div className="form-group">
               <label className="form-label">Category</label>
@@ -535,19 +523,22 @@ const QuotationBuilder = () => {
             </div>
 
             <div className="form-row">
-              <div className="form-group" style={{ flex: 1 }}>
+              <div className="form-group">
                 <label className="form-label">Qty</label>
                 <input type="number" className="form-input" value={draftQty} onChange={(e) => setDraftQty(e.target.value)} min="1" />
               </div>
-              <div className="form-group" style={{ flex: 1.5 }}>
+              <div className="form-group">
                 <label className="form-label">Rate (₹)</label>
                 <input type="number" className="form-input" value={draftRate} onChange={(e) => setDraftRate(e.target.value)} />
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
                 <label className="form-label">CGST (%)</label>
                 <input type="number" className="form-input" value={draftCgst} onChange={(e) => setDraftCgst(e.target.value)} />
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
+              <div className="form-group">
                 <label className="form-label">SGST (%)</label>
                 <input type="number" className="form-input" value={draftSgst} onChange={(e) => setDraftSgst(e.target.value)} />
               </div>
@@ -558,30 +549,28 @@ const QuotationBuilder = () => {
             </button>
           </div>
 
-          <div className="form-row" style={{ marginTop: 'auto' }}>
-            <div className="form-group">
-              <label className="form-label">Overall Discount (₹)</label>
-              <input type="number" className="form-input" value={overallDiscount} onChange={(e) => setOverallDiscount(e.target.value)} />
-            </div>
+          <div className="form-group" style={{ marginTop: 'auto' }}>
+            <label className="form-label">Overall Discount (₹)</label>
+            <input type="number" className="form-input" value={overallDiscount} onChange={(e) => setOverallDiscount(e.target.value)} />
           </div>
 
           <div className="action-row">
             <button className="save-draft-btn" onClick={() => saveQuotation('Draft', false)} disabled={loading}>
-              <FileText size={20} /> Save Draft
+              <FileText size={18} /> Save Draft
             </button>
             <button className="save-pdf-btn" onClick={() => saveQuotation('Pending', true)} disabled={loading}>
-              <CheckCircle size={20} /> Save & Generate PDF
+              <CheckCircle size={18} /> Save & PDF
             </button>
           </div>
 
         </div>
 
         {/* RIGHT PANEL */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
           <div className="items-list-box">
-            <div className="panel-header" style={{ padding: '16px 20px 8px 20px', borderBottom: 'none', margin: 0 }}>
-              <h2 className="panel-title" style={{ fontSize: '1rem' }}><List size={18} color="#475569" /> Added Items</h2>
+            <div className="panel-header" style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
+              <h2 className="panel-title" style={{ fontSize: '0.9rem' }}><List size={18} /> Added Items</h2>
             </div>
 
             <div className="items-header">
@@ -589,27 +578,26 @@ const QuotationBuilder = () => {
               <div>Description</div>
               <div style={{ textAlign: 'center' }}>Qty</div>
               <div style={{ textAlign: 'right' }}>Rate & Tax</div>
-              <div style={{ textAlign: 'right' }}>Amount</div>
               <div style={{ textAlign: 'center' }}>Actions</div>
             </div>
 
             <div className="items-list-scroll">
               {items.length === 0 ? (
-                <div className="empty-state">No items added.</div>
+                <div className="empty-state">No items added yet.</div>
               ) : (
                 items.map((item, idx) => (
                   <div key={item.id} className="item-row">
-                    <div style={{ fontWeight: 800, color: '#94a3b8' }}>{idx + 1}</div>
-                    <div style={{ fontWeight: 700, color: '#1e293b' }}>{item.desc}</div>
-                    <div style={{ textAlign: 'center', fontWeight: 700 }}>{item.qty}</div>
+                    <div style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{idx + 1}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{item.desc}</div>
+                    <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.qty}</div>
                     <div style={{ textAlign: 'right', fontSize: '0.85rem' }}>
-                      <div style={{ fontWeight: 700 }}>₹{item.rate.toLocaleString()}</div>
-                      <div style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 700 }}>+{item.cgst_pct + item.sgst_pct}%</div>
+                      <div style={{ fontWeight: 600 }}>₹{item.rate.toLocaleString()}</div>
+                      <div style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 600 }}>+{item.cgst_pct + item.sgst_pct}%</div>
                     </div>
-                    <div style={{ textAlign: 'right', fontWeight: 800 }}>₹{(item.qty * item.rate).toLocaleString()}</div>
-                    <div className="action-buttons">
-                      <button className="edit-btn" title="Edit Item" onClick={() => editItem(item.id)}><Edit size={13} /></button>
-                      <button className="del-btn" title="Delete Item" onClick={() => removeItem(item.id)}><Trash2 size={13} /></button>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <button className="icon-btn-delete-small" title="Delete Item" onClick={() => removeItem(item.id)}>
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 ))

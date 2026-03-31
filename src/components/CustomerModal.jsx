@@ -46,7 +46,7 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
       errors.phone = 'Phone number must be exactly 10 digits';
     }
     if (!formData.address.trim()) errors.address = 'Address is mandatory';
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -69,7 +69,7 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    
+
     setLoading(true);
     setError(null);
 
@@ -116,18 +116,18 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
               <span>{error}</span>
             </div>
           )}
-          
+
           <div className="form-grid">
             <div className={`form-group ${validationErrors.name ? 'has-error' : ''}`}>
               <label>Name <span className="required">*</span></label>
               <div className="input-with-icon">
                 <User size={18} className="field-icon" />
-                <input 
-                  type="text" 
-                  name="name" 
-                  value={formData.name} 
-                  onChange={handleChange} 
-                  placeholder="Full Name" 
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Full Name"
                 />
               </div>
               {validationErrors.name && <span className="error-hint">{validationErrors.name}</span>}
@@ -137,12 +137,12 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
               <label>Email ID</label>
               <div className="input-with-icon">
                 <Mail size={18} className="field-icon" />
-                <input 
-                  type="email" 
-                  name="email" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  placeholder="email@example.com" 
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="email@example.com"
                 />
               </div>
             </div>
@@ -151,12 +151,12 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
               <label>Phone Number <span className="required">*</span></label>
               <div className="input-with-icon">
                 <Phone size={18} className="field-icon" />
-                <input 
-                  type="text" 
-                  name="phone" 
-                  value={formData.phone} 
-                  onChange={handleChange} 
-                  placeholder="10 digit number" 
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="10 digit number"
                   maxLength={10}
                 />
               </div>
@@ -167,12 +167,12 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
               <label>GST Number</label>
               <div className="input-with-icon">
                 <Hash size={18} className="field-icon" />
-                <input 
-                  type="text" 
-                  name="gst_number" 
-                  value={formData.gst_number} 
-                  onChange={handleChange} 
-                  placeholder="Optional GST" 
+                <input
+                  type="text"
+                  name="gst_number"
+                  value={formData.gst_number}
+                  onChange={handleChange}
+                  placeholder="Optional GST"
                 />
               </div>
             </div>
@@ -181,11 +181,11 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
               <label>Address <span className="required">*</span></label>
               <div className="input-with-icon textarea">
                 <MapPin size={18} className="field-icon" />
-                <textarea 
-                  name="address" 
-                  value={formData.address} 
-                  onChange={handleChange} 
-                  placeholder="Enter full client address..." 
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Enter full client address..."
                   rows="3"
                 ></textarea>
               </div>

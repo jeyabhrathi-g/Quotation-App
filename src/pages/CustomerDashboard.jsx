@@ -4,8 +4,10 @@ import './CustomerDashboard.css';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import CustomerModal from '../components/CustomerModal';
+import { useNavigate } from 'react-router-dom';
 
 const CustomerDashboard = () => {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,31 +70,36 @@ const CustomerDashboard = () => {
 
   return (
     <div className="dashboard-content-wrapper">
-      <div className="page-action-bar">
-        <div className="content-search-box">
-          <Search size={20} className="search-icon-inside" />
-          <input
-            type="text"
-            placeholder="Search by name, phone or email..."
-            className="content-search-field"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="page-action-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div className="action-row-left" style={{ flex: '1 1 300px' }}>
+          <div className="local-search-box" style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              placeholder="Search customers..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '999px', border: '1px solid var(--border-color)', outline: 'none', background: 'white', color: 'var(--text-main)' }}
+            />
+          </div>
         </div>
-        <button className="register-btn" onClick={handleAddCustomer}>
-          <UserPlus size={20} />
-          <span>Register Customer</span>
-        </button>
+        <div className="action-row-right" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <div className="action-stats">
+            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.95rem' }}>Total: {filteredCustomers.length}</span>
+          </div>
+          <button className="register-btn-medium" onClick={handleAddCustomer} style={{ borderRadius: '999px', padding: '12px 28px', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--primary-navy)', color: 'white', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
+            <UserPlus size={18} />
+            <span>Register Customer</span>
+          </button>
+        </div>
       </div>
 
       <div className="main-scroll-area">
         <div className="table-container">
-          <div className="table-header">
-            <div className="col profile">CUSTOMER PROFILE</div>
-            <div className="col contact">CONTACT INFO</div>
-            <div className="col gst">GST NUMBER</div>
+          <div className="table-header simple-view">
+            <div className="col profile">CUSTOMER NAME</div>
+            <div className="col contact">PHONE NUMBER</div>
             <div className="col address">ADDRESS</div>
-            <div className="col actions">ACTIONS</div>
           </div>
 
           {loading ? (
@@ -102,40 +109,22 @@ const CustomerDashboard = () => {
           ) : (
             <div className="table-body">
               {filteredCustomers.map((customer) => (
-                <div key={customer.id} className="table-row">
+                <div key={customer.id} className="table-row simple-view" onClick={() => navigate(`/customers/${customer.id}`)} style={{ cursor: 'pointer' }}>
                   <div className="col profile">
                     <div className="avatar">
                       {customer.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="customer-details-text">
-                      <span className="customer-name-text">{customer.name}</span>
-                      <span className="email-small-hidden">{customer.email || 'No email provided'}</span>
+                      <span className="customer-name-text clickable">{customer.name}</span>
                     </div>
                   </div>
 
-                  <div className="col contact">
-                    <div className="contact-details">
-                      <span className="phone-bold">{customer.phone}</span>
-                      <span className="email-small-detail">{customer.email || 'no-email'}</span>
-                    </div>
+                  <div className="col contact" data-label="Phone Number">
+                    <span className="phone-bold">{customer.phone}</span>
                   </div>
 
-                  <div className="col gst">
-                    <span className={`gst-badge ${!customer.gst_number ? 'unregistered' : ''}`}>
-                      {customer.gst_number || 'UNREGISTERED'}
-                    </span>
-                  </div>
-
-                  <div className="col address">
+                  <div className="col address" data-label="Address">
                     <span className="address-text">{customer.address}</span>
-                  </div>
-
-                  <div className="col actions">
-                    <div className="action-buttons">
-                      <button className="icon-btn edit" onClick={() => handleEditCustomer(customer)}>
-                        <Edit2 size={18} />
-                      </button>
-                    </div>
                   </div>
                 </div>
               ))}

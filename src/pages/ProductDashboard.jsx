@@ -6,8 +6,10 @@ import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import ProductModal from '../components/ProductModal';
 import CategoryModal from '../components/CategoryModal';
+import { useNavigate } from 'react-router-dom';
 
 const ProductDashboard = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -79,24 +81,29 @@ const ProductDashboard = () => {
 
   return (
     <div className="dashboard-content-wrapper">
-      <div className="page-action-bar">
-        <div className="content-search-box">
-          <Search size={20} className="search-icon-inside" />
-          <input
-            type="text"
-            placeholder="Search in all fields..."
-            className="content-search-field"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="page-action-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div className="action-row-left" style={{ flex: '1 1 300px' }}>
+          <div className="local-search-box" style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              placeholder="Search products..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '999px', border: '1px solid var(--border-color)', outline: 'none', background: 'white', color: 'var(--text-main)' }}
+            />
+          </div>
         </div>
-        <div className="action-buttons-group">
-          <button className="add-category-btn" onClick={() => setIsCategoryModalOpen(true)}>
+        <div className="action-row-right" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <div className="action-stats">
+            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.95rem' }}>Total: {filteredProducts.length}</span>
+          </div>
+          <button className="add-category-btn" onClick={() => setIsCategoryModalOpen(true)} style={{ borderRadius: '999px', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer' }}>
             <Tag size={18} />
             <span>Add Category</span>
           </button>
-          <button className="add-product-btn" onClick={handleAddProduct}>
-            <Plus size={22} />
+          <button className="add-product-btn" onClick={handleAddProduct} style={{ borderRadius: '999px', padding: '12px 28px', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--primary-navy)', color: 'white', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
+            <Plus size={20} />
             <span>Add Product</span>
           </button>
         </div>
@@ -106,11 +113,10 @@ const ProductDashboard = () => {
         <div className="table-container product-table">
           <div className="table-header product-table-header">
             <div className="col cat-col">CATEGORY</div>
-            <div className="col name-col">PRODUCT NAME</div>
+            <div className="col name-col">SUB CATEGORY</div>
             <div className="col specs-col">SPECS (PHASE/RPM)</div>
             <div className="col steel-col">STEEL / ENERGY</div>
             <div className="col rate-col">RATE (₹)</div>
-            <div className="col actions-col">ACTION</div>
           </div>
 
           {loading ? (
@@ -120,40 +126,29 @@ const ProductDashboard = () => {
           ) : (
             <div className="table-body">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="table-row product-row">
-                  <div className="col cat-col">
+                <div key={product.id} className="table-row product-row" onClick={() => navigate(`/products/${product.id}`)} style={{ cursor: 'pointer' }}>
+                  <div className="col cat-col" data-label="Category">
                     <span className="category-tag-badge">{product.category}</span>
                   </div>
 
-                  <div className="col name-col">
-                    <span className="product-name-bold">{product.sub_category}</span>
+                  <div className="col name-col" data-label="Sub Category">
+                    <span className="product-name-bold clickable">{product.sub_category}</span>
                   </div>
 
-                  <div className="col specs-col">
+                  <div className="col specs-col" data-label="Specs (Phase/RPM)">
                     <span className="specs-text">
                       {product.phase || '-'} Ph / {product.rpm || '-'} RPM
                     </span>
                   </div>
 
-                  <div className="col steel-col">
+                  <div className="col steel-col" data-label="Steel / Energy">
                     <span className="steel-energy-text">
                       {product.steel} <span className="separator">|</span> {product.energy}
                     </span>
                   </div>
 
-                  <div className="col rate-col">
+                  <div className="col rate-col" data-label="Rate (₹)">
                     <span className="rate-text-green">₹{parseFloat(product.rate || 0).toLocaleString()}</span>
-                  </div>
-
-                  <div className="col actions-col">
-                    <div className="action-buttons-list">
-                      <button className="icon-btn-edit-small" onClick={() => handleEditProduct(product)}>
-                        <Edit2 size={16} />
-                      </button>
-                      <button className="icon-btn-delete-small" onClick={() => handleDeletePrompt(product)}>
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
                   </div>
                 </div>
               ))}

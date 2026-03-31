@@ -39,64 +39,42 @@ const CategoryModal = ({ isOpen, onClose, onCategoryAdded }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '450px' }}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" style={{ maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <div className="header-title">
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b' }}>NEW CATEGORY</h2>
+            <h2>Add New Category</h2>
+            <p>Create a group for your products</p>
           </div>
-          <button className="close-btn" onClick={onClose}><X size={24} /></button>
+          <button className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
           {error && (
             <div className="top-error-message">
+              <Tag size={18} />
               <span>{error}</span>
             </div>
           )}
 
           <div className="form-group full-width">
-            <label style={{ fontSize: '0.75rem', fontWeight: '800', color: '#94a3b8', marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>CATEGORY NAME</label>
+            <label>Category Name <span className="required">*</span></label>
             <div className="input-with-icon">
+              <Tag size={18} className="field-icon" />
               <input
                 type="text"
-                placeholder="e.g., Grinders"
+                placeholder="e.g. Grinders, Ovens, etc."
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1.5px solid #eef2f6',
-                  fontSize: '1rem',
-                  color: '#1e293b',
-                  backgroundColor: '#fff',
-                  transition: 'all 0.2s ease'
-                }}
                 required
               />
             </div>
           </div>
 
-          <div className="modal-footer" style={{ borderTop: 'none', padding: '0 0 24px 0', marginTop: '10px' }}>
-            <button 
-              type="submit" 
-              className="submit-modal-btn" 
-              style={{ 
-                width: '100%', 
-                backgroundColor: '#1e293b', 
-                color: '#fff',
-                height: '52px',
-                borderRadius: '12px',
-                fontSize: '0.9rem',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                boxShadow: '0 4px 12px rgba(30, 41, 59, 0.15)'
-              }}
-              disabled={loading}
-            >
-              {loading ? 'Adding...' : 'ADD TO CATALOG'}
+          <div className="modal-footer">
+            <button type="button" className="cancel-modal-btn" onClick={onClose}>Cancel</button>
+            <button type="submit" className="submit-modal-btn" disabled={loading}>
+              {loading ? 'Adding...' : 'Create Category'}
             </button>
           </div>
         </form>

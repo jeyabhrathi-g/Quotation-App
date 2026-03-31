@@ -60,21 +60,21 @@ const InvoiceDashboard = () => {
       {/* Stats */}
       <div className="inv-stats">
         <div className="inv-stat-card">
-          <div className="inv-stat-icon" style={{ background: '#eff6ff' }}><FileText size={22} color="#3b82f6" /></div>
+          <div className="inv-stat-icon"><FileText size={20} /></div>
           <div>
             <div className="inv-stat-label">Total Invoices</div>
             <div className="inv-stat-value">{stats.total}</div>
           </div>
         </div>
         <div className="inv-stat-card">
-          <div className="inv-stat-icon" style={{ background: '#f0fdf4' }}><CheckCircle size={22} color="#10b981" /></div>
+          <div className="inv-stat-icon" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}><CheckCircle size={20} /></div>
           <div>
             <div className="inv-stat-label">Active</div>
             <div className="inv-stat-value">{stats.active}</div>
           </div>
         </div>
         <div className="inv-stat-card">
-          <div className="inv-stat-icon" style={{ background: '#fef3c7' }}><TrendingUp size={22} color="#f59e0b" /></div>
+          <div className="inv-stat-icon" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}><TrendingUp size={20} /></div>
           <div>
             <div className="inv-stat-label">Total Value</div>
             <div className="inv-stat-value">₹{Math.round(stats.totalValue).toLocaleString('en-IN')}</div>
@@ -82,17 +82,23 @@ const InvoiceDashboard = () => {
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="inv-filter-bar">
-        <div className="inv-search-box">
-          <Search size={16} color="#94a3b8" />
-          <input
-            type="text"
-            placeholder="Search invoice, quotation, customer..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="inv-search-input"
-          />
+      <div className="inv-filter-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div className="action-row-left" style={{ flex: '1 1 300px' }}>
+          <div className="local-search-box" style={{ position: 'relative', width: '100%', maxWidth: '400px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              placeholder="Search invoices..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: '999px', border: '1px solid var(--border-color)', outline: 'none', background: 'white', color: 'var(--text-main)' }}
+            />
+          </div>
+        </div>
+        <div className="action-row-right" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+          <div className="action-stats">
+            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.95rem' }}>Total: {filteredInvoices.length}</span>
+          </div>
         </div>
       </div>
 
@@ -117,15 +123,15 @@ const InvoiceDashboard = () => {
         ) : (
           filteredInvoices.map((inv) => (
             <div key={inv.id} className="inv-table-row">
-              <div className="inv-inv-no">{inv.invoice_no}</div>
-              <div className="inv-quote-no">{inv.quotation_no || '-'}</div>
-              <div className="inv-customer">{inv.customers?.name || '-'}</div>
-              <div className="inv-date">
+              <div className="inv-inv-no" data-label="Invoice No">{inv.invoice_no}</div>
+              <div className="inv-quote-no" data-label="Quotation No">{inv.quotation_no || '-'}</div>
+              <div className="inv-customer" data-label="Customer">{inv.customers?.name || '-'}</div>
+              <div className="inv-date" data-label="Date">
                 {inv.invoice_date
                   ? new Date(inv.invoice_date).toLocaleDateString('en-GB')
                   : new Date(inv.created_at).toLocaleDateString('en-GB')}
               </div>
-              <div className="inv-amount">₹{Math.round(inv.total || 0).toLocaleString('en-IN')}</div>
+              <div className="inv-amount" data-label="Amount">₹{Math.round(inv.total || 0).toLocaleString('en-IN')}</div>
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button
                   className="inv-view-btn"

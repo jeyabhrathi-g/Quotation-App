@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useAppContext } from '../context/AppContext';
 import { User, Lock, AlertCircle } from 'lucide-react';
 import './Login.css';
 
@@ -9,6 +10,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { appName } = useAppContext();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,8 +28,10 @@ const Login = () => {
     <div className="login-wrapper">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo-badge">SSV</div>
-          <h1>SSV Food Tech</h1>
+          <div className="logo-badge">
+            {appName ? appName.substring(0, 3).toUpperCase() : 'APP'}
+          </div>
+          <h1>{appName}</h1>
           <p>Sign in to your account</p>
         </div>
 
@@ -69,7 +73,7 @@ const Login = () => {
         </form>
 
         <div className="login-footer">
-          <p>© 2026 SSV Food Tech Solutions</p>
+          <p>© {new Date().getFullYear()} {appName} Solutions</p>
         </div>
       </div>
     </div>

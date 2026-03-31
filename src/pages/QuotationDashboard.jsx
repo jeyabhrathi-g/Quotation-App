@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FilePlus, Search, FileText, Calendar, Filter, Clock, CheckCircle, Package, AlertTriangle, X } from 'lucide-react';
+import { FilePlus, Search, FileText, Calendar, Filter, Clock, CheckCircle, Package, AlertTriangle, X, Plus } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import { generateInvoiceNumber, generateInvoicePDF } from '../utils/invoiceGenerator';
@@ -215,29 +215,29 @@ const QuotationDashboard = () => {
 
       {/* Stats Cards */}
       <div className="stats-grid">
-        <div className="stat-card total-quotes">
-          <div className="stat-icon-wrapper"><FileText size={24} /></div>
+        <div className="stat-card">
+          <div className="stat-icon-wrapper"><FileText size={20} /></div>
           <div className="stat-info">
             <span className="stat-label">Total Quotes</span>
             <span className="stat-value">{stats.total}</span>
           </div>
         </div>
-        <div className="stat-card pending-quotes">
-          <div className="stat-icon-wrapper"><Clock size={24} /></div>
+        <div className="stat-card">
+          <div className="stat-icon-wrapper" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}><Clock size={20} /></div>
           <div className="stat-info">
             <span className="stat-label">Pending</span>
             <span className="stat-value">{stats.pending}</span>
           </div>
         </div>
-        <div className="stat-card invoiced-quotes">
-          <div className="stat-icon-wrapper"><CheckCircle size={24} /></div>
+        <div className="stat-card">
+          <div className="stat-icon-wrapper" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}><CheckCircle size={20} /></div>
           <div className="stat-info">
             <span className="stat-label">Invoiced</span>
             <span className="stat-value">{stats.closed}</span>
           </div>
         </div>
-        <div className="stat-card draft-quotes">
-          <div className="stat-icon-wrapper"><Package size={24} /></div>
+        <div className="stat-card">
+          <div className="stat-icon-wrapper" style={{ background: 'var(--input-bg)', color: 'var(--text-muted)' }}><Package size={20} /></div>
           <div className="stat-info">
             <span className="stat-label">Drafts</span>
             <span className="stat-value">{stats.draft}</span>
@@ -245,27 +245,41 @@ const QuotationDashboard = () => {
         </div>
       </div>
 
-      <div className="filter-bar">
-        <div className="content-search-box">
-          <Search size={20} className="search-icon-inside" />
-          <input type="text" placeholder="Search anything..." className="content-search-field"
-            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+      <div className="filter-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div className="action-row-left" style={{ flex: '1 1 250px' }}>
+          <div className="local-search-box" style={{ position: 'relative', width: '100%', maxWidth: '350px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              placeholder="Search quotations..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '999px', border: '1px solid var(--border-color)', outline: 'none', background: 'white', color: 'var(--text-main)' }}
+            />
+          </div>
         </div>
-        <div className="date-filter-box">
-          <input type="date" className="date-input" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
+        <div className="filter-controls" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div className="action-stats" style={{ marginRight: '8px' }}>
+            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.95rem' }}>Total: {filteredQuotations.length}</span>
+          </div>
+          <div className="date-filter-box" style={{ padding: '8px 12px' }}>
+            <Calendar size={16} style={{ marginRight: '8px', color: 'var(--text-muted)' }} />
+            <input type="date" className="date-input" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
+          </div>
+          <div className="status-filter-box" style={{ padding: '8px 12px' }}>
+            <Filter size={16} style={{ marginRight: '8px', color: 'var(--text-muted)' }} />
+            <select className="status-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+              <option value="All">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Draft">Draft</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          <button className="new-quote-btn" onClick={() => navigate('/quotations/new')} style={{ borderRadius: '999px', padding: '10px 24px', boxShadow: 'var(--shadow-sm)' }}>
+            <Plus size={18} />
+            <span>New Quotation</span>
+          </button>
         </div>
-        <div className="status-filter-box">
-          <select className="status-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="All">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Draft">Draft</option>
-            <option value="Closed">Closed</option>
-          </select>
-        </div>
-        <button className="new-quote-btn" onClick={() => navigate('/quotations/new')}>
-          <FilePlus size={20} />
-          <span>+ New Quotation</span>
-        </button>
       </div>
 
       <div className="main-scroll-area">
@@ -291,12 +305,12 @@ const QuotationDashboard = () => {
 
                 return (
                   <div key={quote.id} className="table-row quote-row">
-                    <div className="col">
+                    <div className="col" data-label="Quote Number">
                       <span
                         className="quote-no-text"
                         style={{
                           cursor: isClickable ? 'pointer' : 'default',
-                          color: isPending ? '#10b981' : isDraft ? '#2563eb' : 'inherit',
+                          color: isPending ? 'var(--success)' : isDraft ? 'var(--primary-navy)' : 'inherit',
                           textDecoration: isClickable ? 'underline' : 'none',
                           fontWeight: 700
                         }}
@@ -306,16 +320,16 @@ const QuotationDashboard = () => {
                         {quote.quotation_no || '-'}
                       </span>
                     </div>
-                    <div className="col">
+                    <div className="col" data-label="Creation Date">
                       <span className="date-text">{new Date(quote.created_at).toLocaleDateString('en-GB')}</span>
                     </div>
-                    <div className="col">
+                    <div className="col" data-label="Customer Name">
                       <span className="customer-name-bold">{quote.customers?.name || '-'}</span>
                     </div>
-                    <div className="col">
+                    <div className="col" data-label="Net Amount">
                       <span className="amount-text">₹{quote.total != null ? Math.round(quote.total).toLocaleString('en-IN') : '0'}</span>
                     </div>
-                    <div className="col">
+                    <div className="col" data-label="Status">
                       <span
                         className={`status-pill ${quote.status?.toLowerCase()}`}
                         style={{ cursor: isClickable ? 'pointer' : 'default' }}

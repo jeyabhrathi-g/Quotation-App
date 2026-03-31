@@ -43,6 +43,7 @@ const numberToWords = (num) => {
 };
 
 export const generateInvoicePDF = async (invoiceData, customerData) => {
+  const appName = localStorage.getItem('ssv_app_name') || 'SSV Food Tech';
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
   const L = 10; // left margin
@@ -75,7 +76,7 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     body: [
       [
         {
-          content: `SSV Food Technology\n1/145A, Sarogini Nagar, Kalaikoil Nagar,\nKrishnapuram, Tirunelveli - 627011\nState: Tamil Nadu, Code - 33\nGSTIN: 33SGXPS5865Q1ZJ`,
+          content: `${appName}\n1/145A, Sarogini Nagar, Kalaikoil Nagar,\nKrishnapuram, Tirunelveli - 627011\nState: Tamil Nadu, Code - 33\nGSTIN: 33SGXPS5865Q1ZJ`,
           styles: { fontStyle: 'bold', cellWidth: 90 }
         },
         {
@@ -318,7 +319,7 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
       [
         { content: `Customer's Seal and Signature`, styles: { cellWidth: 95, minCellHeight: 22, valign: 'top' } },
         {
-          content: `for SSV Food Technology\n\n\n\n\nAuthorised Signatory`,
+          content: `for ${appName}\n\n\n\n\nAuthorised Signatory`,
           styles: { cellWidth: 'auto', halign: 'right', valign: 'bottom', minCellHeight: 22 }
         }
       ]
