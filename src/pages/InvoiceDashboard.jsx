@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Eye, Search, TrendingUp, CheckCircle } from 'lucide-react';
+import { FileText, Download, Search, TrendingUp, CheckCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import './InvoiceDashboard.css';
@@ -46,9 +46,25 @@ const InvoiceDashboard = () => {
     totalValue: invoices.reduce((s, i) => s + (i.total || 0), 0)
   }), [invoices]);
 
-  const handleViewPDF = (url) => {
+  const handleDownloadPDF = async (url, invoiceNo) => {
     if (url) {
-      window.open(url, '_blank');
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${invoiceNo}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (err) {
+        console.error('Download failed:', err);
+        // Fallback: open in new tab if download fails
+        window.open(url, '_blank');
+      }
     } else {
       alert('PDF URL not available for this invoice.');
     }
@@ -135,10 +151,10 @@ const InvoiceDashboard = () => {
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <button
                   className="inv-view-btn"
-                  onClick={() => handleViewPDF(inv.invoice_pdf_url)}
-                  title="View Invoice PDF"
+                  onClick={() => handleDownloadPDF(inv.invoice_pdf_url, inv.invoice_no)}
+                  title="Download Invoice PDF"
                 >
-                  <Eye size={14} /> View
+                  <Download size={14} /> Download
                 </button>
               </div>
             </div>
