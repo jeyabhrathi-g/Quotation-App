@@ -253,7 +253,22 @@ const QuotationBuilder = () => {
   };
 
   const getNumberInWords = (amount) => {
-    return 'Total Amount Only'; // Placeholder for numeral converter logic
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    const convert = (n) => {
+      if (n < 20) return ones[n];
+      if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
+      if (n < 1000) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convert(n % 100) : '');
+      if (n < 100000) return convert(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + convert(n % 1000) : '');
+      if (n < 10000000) return convert(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + convert(n % 100000) : '');
+      return convert(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + convert(n % 10000000) : '');
+    };
+
+    const rounded = Math.round(Number(amount) || 0);
+    if (rounded === 0) return 'Zero Only';
+    return convert(rounded) + ' Only';
   };
 
   const generateAndUploadPDF = async (quoteData) => {
@@ -289,7 +304,7 @@ const QuotationBuilder = () => {
 
     const currY1 = doc.lastAutoTable.finalY;
 
-    // Buyer Grids
+    // Buyer Grids — show GST number only if available
     autoTable(doc, {
       startY: currY1,
       theme: 'grid',
@@ -297,8 +312,23 @@ const QuotationBuilder = () => {
       body: [
         [{ content: 'BILL TO', styles: { fontStyle: 'bold' } }, { content: 'SHIP TO', styles: { fontStyle: 'bold' } }],
         [
-          { content: `${quoteData.customers?.name || ''}\n${quoteData.customers?.address || ''}\nPhone: ${quoteData.customers?.phone || ''}`, styles: { minCellHeight: 20 } },
-          { content: `${quoteData.customers?.name || ''}\n${quoteData.customers?.address || ''}\nPhone: ${quoteData.customers?.phone || ''}`, styles: { minCellHeight: 20 } }
+          {
+            content: [
+              quoteData.customers?.name,
+              quoteData.customers?.address,
+              `Phone: ${quoteData.customers?.phone || ''}`,
+              quoteData.customers?.gst_number ? `GSTIN: ${quoteData.customers.gst_number}` : null
+            ].filter(Boolean).join('\n'),
+            styles: { minCellHeight: 20 }
+          },
+          {
+            content: [
+              quoteData.customers?.name,
+              quoteData.customers?.address,
+              `Phone: ${quoteData.customers?.phone || ''}`
+            ].filter(Boolean).join('\n'),
+            styles: { minCellHeight: 20 }
+          }
         ]
       ],
       columnStyles: { 0: { cellWidth: '50%' }, 1: { cellWidth: '50%' } }
@@ -313,17 +343,17 @@ const QuotationBuilder = () => {
     
     currentItems.forEach((item, index) => {
       const amt = item.qty * item.rate;
-      const combinedTax = item.cgst_pct + item.sgst_pct;
+      const combinedTax = (item.cgst_pct || 0) + (item.sgst_pct || 0);
       const taxAmt = amt * (combinedTax / 100);
       const grandAmt = amt + taxAmt;
-      
+
       tableRows.push([
         (index + 1).toString(),
-        item.desc,
+        item.desc || '',
         item.qty.toString(),
-        item.rate.toString(),
+        item.rate.toFixed(0),
         combinedTax.toString(),
-        grandAmt.toString()
+        Math.round(grandAmt).toString()
       ]);
     });
 

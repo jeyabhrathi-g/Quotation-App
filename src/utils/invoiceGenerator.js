@@ -67,7 +67,19 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
   doc.setFont('helvetica', 'normal');
   doc.text('ORIGINAL FOR RECIPIENT', pageW - 10, 10, { align: 'right' });
 
-  // ── SELLER + META BLOCK ──────────────────────────────────────────────────────
+  // ── SELLER + META BLOCK (3-column: 90 | 55 | auto — must match buyer block) ──
+  const fmtDate = (d) => {
+    const date = new Date(d);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mon = date.toLocaleString('en-GB', { month: 'short' });
+    const yy = String(date.getFullYear()).slice(2);
+    return `${dd}-${mon}-${yy}`;
+  };
+
+  const invoiceDate = fmtDate(invoiceData.invoice_date || invoiceData.created_at);
+  const COL1 = 90; // shared width — MUST stay identical in buyer block below
+  const COL2 = 55;
+
   autoTable(doc, {
     startY: 16,
     margin: { left: L, right: R },
@@ -76,24 +88,35 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     body: [
       [
         {
-          content: `${appName}\n1/145A, Sarogini Nagar, Kalaikoil Nagar,\nKrishnapuram, Tirunelveli - 627011\nState: Tamil Nadu, Code - 33\nGSTIN: 33SGXPS5865Q1ZJ`,
-          styles: { fontStyle: 'bold', cellWidth: 90 }
+          content: `${appName}\n1/145A, Sarogini Nagar, Kalaikoil Nagar,\nKrishnapuram, Tirunelveli - 627011\nGSTIN: 33SGXPS5865Q1ZJ\nState Name : Tamil Nadu, Code : 627011\nContact : 88072 70873`,
+          rowSpan: 3,
+          styles: { fontStyle: 'bold', cellWidth: COL1, valign: 'top' }
         },
-        {
-          content: [
-            `Invoice No: ${invoiceData.invoice_no}`,
-            `Invoice Date: ${new Date(invoiceData.invoice_date || invoiceData.created_at).toLocaleDateString('en-GB')}`,
-            `Due Date: ${new Date(new Date(invoiceData.created_at).getTime() + 7 * 86400000).toLocaleDateString('en-GB')}`,
-          ].join('\n'),
-          styles: { cellWidth: 'auto' }
-        }
-      ]
+        { content: 'Invoice No.', styles: { fontStyle: 'bold', cellWidth: COL2 } },
+        { content: 'Dated', styles: { fontStyle: 'bold' } },
+      ],
+      [
+        { content: invoiceData.invoice_no || '', styles: { fontStyle: 'bold', cellWidth: COL2 } },
+        { content: invoiceDate },
+      ],
+      [
+        { content: 'Delivery Note', styles: { cellWidth: COL2 } },
+        { content: 'Mode/Terms of Payment' },
+      ],
     ],
   });
 
   let currY = doc.lastAutoTable.finalY;
 
-  // ── BUYER BLOCK ──────────────────────────────────────────────────────────────
+  // ── BUYER BLOCK (3-column: 90 | 55 | auto — same as seller block above) ──────
+  // Build buyer lines — show GST only if available (DB field is gst_number)
+  const buyerLines = [];
+  if (customerData?.name)         buyerLines.push(customerData.name);
+  if (customerData?.address)      buyerLines.push(customerData.address);
+  if (customerData?.phone)        buyerLines.push(`Contact: ${customerData.phone}`);
+  const gstNo = customerData?.gst_number || customerData?.gstin || '';
+  if (gstNo.trim() !== '')        buyerLines.push(`GSTIN: ${gstNo}`);
+
   autoTable(doc, {
     startY: currY,
     margin: { left: L, right: R },
@@ -101,90 +124,115 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2 },
     body: [
       [
-        { content: `Bill To / Buyer Details`, styles: { fontStyle: 'bold', cellWidth: 90 } },
-        { content: `Ship To`, styles: { fontStyle: 'bold' } }
+        { content: 'Buyer (Bill to)', styles: { fontStyle: 'bold', cellWidth: COL1 } },
+        { content: "Buyer's Order No.", styles: { cellWidth: COL2 } },
+        { content: 'Dated' },
       ],
       [
         {
-          content: `${customerData?.name || ''}\n${customerData?.address || ''}\n${customerData?.city || ''} ${customerData?.state || ''}\nGSTIN: ${customerData?.gstin || 'N/A'}`,
-          styles: { minCellHeight: 18, cellWidth: 90 }
+          content: buyerLines.join('\n'),
+          styles: { minCellHeight: 22, cellWidth: COL1, fontStyle: 'bold' },
         },
-        {
-          content: `${customerData?.name || ''}\n${customerData?.address || ''}\n${customerData?.city || ''} ${customerData?.state || ''}`,
-          styles: { minCellHeight: 18 }
-        }
-      ]
-    ]
+        { content: 'Dispatch Doc No.', styles: { cellWidth: COL2 } },
+        { content: 'Delivery Note Date' },
+      ],
+      [
+        { content: '', styles: { cellWidth: COL1 } },
+        { content: 'Dispatched through', styles: { cellWidth: COL2 } },
+        { content: 'Destination' },
+      ],
+      [
+        { content: '', styles: { cellWidth: COL1 } },
+        { content: 'Terms of Delivery', colSpan: 2, styles: { minCellHeight: 12 } },
+      ],
+    ],
   });
 
   currY = doc.lastAutoTable.finalY;
 
   // ── ITEMS TABLE ──────────────────────────────────────────────────────────────
-  const itemRows = [];
+  // Step 1: Calculate totals per product individually, then sum
   let taxableTotal = 0;
   let cgstTotal = 0;
   let sgstTotal = 0;
+  let totalQty = 0;
+
+  items.forEach((item) => {
+    const base     = (item.qty  || 0) * (item.rate     || 0);
+    const cgstAmt  = base * ((item.cgst_pct || 0) / 100);  // per-product rate
+    const sgstAmt  = base * ((item.sgst_pct || 0) / 100);  // per-product rate
+    taxableTotal  += base;
+    cgstTotal     += cgstAmt;   // sum all, regardless of different rates
+    sgstTotal     += sgstAmt;
+    totalQty      += (item.qty || 0);
+  });
+
+  const grandTotal = taxableTotal + cgstTotal + sgstTotal - (invoiceData.discount || 0);
+
+  // Step 2: Build product rows — ONE clean row per product, NO per-product GST sub-rows
+  const itemRows = [];
 
   items.forEach((item, index) => {
-    const base = item.qty * item.rate;
-    const cgstAmt = base * (item.cgst_pct / 100);
-    const sgstAmt = base * (item.sgst_pct / 100);
-    const grandAmt = base + cgstAmt + sgstAmt;
-
-    taxableTotal += base;
-    cgstTotal += cgstAmt;
-    sgstTotal += sgstAmt;
-
-    // Main item row
+    const base = (item.qty || 0) * (item.rate || 0);
     itemRows.push([
       { content: (index + 1).toString(), styles: { halign: 'center', fontStyle: 'bold' } },
-      { content: item.desc, styles: { fontStyle: 'bold' } },
-      { content: '---', styles: { halign: 'center' } },
+      { content: item.desc || '', styles: { fontStyle: 'bold' } },
+      { content: item.hsn || '---', styles: { halign: 'center' } },
       { content: `${item.qty} nos`, styles: { halign: 'center' } },
       { content: fmt(item.rate, 0), styles: { halign: 'right' } },
       { content: 'nos', styles: { halign: 'center' } },
       { content: fmt(base), styles: { halign: 'right' } }
     ]);
-    // Base subtotal repeat
-    itemRows.push([
-      '', '', '', '', '', '',
-      { content: fmt(base), styles: { halign: 'right', fontSize: 7 } }
-    ]);
-    // CGST sub-row
-    itemRows.push([
-      '',
-      { content: `CGST @ ${item.cgst_pct}%`, styles: { halign: 'right', fontStyle: 'bold' } },
-      '', '',
-      { content: `${item.cgst_pct} %`, styles: { halign: 'right' } },
-      '',
-      { content: fmt(cgstAmt), styles: { halign: 'right', fontStyle: 'bold' } }
-    ]);
-    // SGST sub-row
-    itemRows.push([
-      '',
-      { content: `SGST @ ${item.sgst_pct}%`, styles: { halign: 'right', fontStyle: 'bold' } },
-      '', '',
-      { content: `${item.sgst_pct} %`, styles: { halign: 'right' } },
-      '',
-      { content: fmt(sgstAmt), styles: { halign: 'right', fontStyle: 'bold' } }
-    ]);
-    // Spacer rows
-    itemRows.push(['', '', '', '', '', '', '']);
-    itemRows.push(['', '', '', '', '', '', '']);
-    itemRows.push(['', '', '', '', '', '', '']);
   });
 
-  // Total row — clean separate row with bold right-aligned amount
-  const grandTotal = taxableTotal + cgstTotal + sgstTotal - (invoiceData.discount || 0);
-  const totalQty = items.reduce((s, i) => s + i.qty, 0);
+  // Calculate combined/representative GST rates for display
+  const uniqueCgstRates = [...new Set(items.map(i => i.cgst_pct || 0))];
+  const uniqueSgstRates = [...new Set(items.map(i => i.sgst_pct || 0))];
+  const cgstLabel = uniqueCgstRates.length === 1
+    ? `CGST @ ${uniqueCgstRates[0]}%` : 'CGST Total';
+  const sgstLabel = uniqueSgstRates.length === 1
+    ? `SGST @ ${uniqueSgstRates[0]}%` : 'SGST Total';
+  const cgstRateStr = uniqueCgstRates.length === 1 ? `${uniqueCgstRates[0]} %` : 'Mixed';
+  const sgstRateStr = uniqueSgstRates.length === 1 ? `${uniqueSgstRates[0]} %` : 'Mixed';
+
+  // Step 3: Taxable subtotal
   itemRows.push([
-    { content: '', styles: { } },
-    { content: 'Total', styles: { halign: 'center', fontStyle: 'bold', fontSize: 9 } },
-    { content: '' },
-    { content: `${totalQty} nos`, styles: { halign: 'center', fontStyle: 'bold' } },
-    { content: '' },
-    { content: '' },
-    { content: `Rs. ${fmt(grandTotal)}`, styles: { halign: 'right', fontStyle: 'bold', fontSize: 10 } }
+    '', '', '', '', '', '',
+    { content: fmt(taxableTotal), styles: { halign: 'right', fontSize: 7.5 } }
+  ]);
+
+  // Step 4: CGST combined row (ONE row, sum of all products)
+  itemRows.push([
+    '',
+    { content: cgstLabel, styles: { halign: 'right', fontStyle: 'bold' } },
+    '', '',
+    { content: cgstRateStr, styles: { halign: 'right' } },
+    '',
+    { content: fmt(cgstTotal), styles: { halign: 'right', fontStyle: 'bold' } }
+  ]);
+
+  // Step 5: SGST combined row (ONE row, sum of all products)
+  itemRows.push([
+    '',
+    { content: sgstLabel, styles: { halign: 'right', fontStyle: 'bold' } },
+    '', '',
+    { content: sgstRateStr, styles: { halign: 'right' } },
+    '',
+    { content: fmt(sgstTotal), styles: { halign: 'right', fontStyle: 'bold' } }
+  ]);
+
+  // Spacer
+  itemRows.push(['', '', '', '', '', '', '']);
+
+  // Grand Total row — highlighted background for clarity
+  itemRows.push([
+    { content: '', styles: { fillColor: [245, 245, 245] } },
+    { content: 'Total', styles: { halign: 'center', fontStyle: 'bold', fontSize: 9, fillColor: [245, 245, 245] } },
+    { content: '', styles: { fillColor: [245, 245, 245] } },
+    { content: `${totalQty} nos`, styles: { halign: 'center', fontStyle: 'bold', fillColor: [245, 245, 245] } },
+    { content: '', styles: { fillColor: [245, 245, 245] } },
+    { content: '', styles: { fillColor: [245, 245, 245] } },
+    { content: `Rs. ${fmt(grandTotal)}`, styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, fillColor: [245, 245, 245] } }
   ]);
 
   autoTable(doc, {
@@ -283,7 +331,7 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
         { content: (cgstTotal + sgstTotal).toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } }
       ]
     ],
-    headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold', textColor: [0,0,0], lineColor: [0,0,0], lineWidth: 0.2 },
+    headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
     columnStyles: {
       0: { cellWidth: 22 }, 1: { cellWidth: 28 }, 2: { cellWidth: 18 },
       3: { cellWidth: 22 }, 4: { cellWidth: 18 }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' }
