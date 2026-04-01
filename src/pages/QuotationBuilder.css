@@ -239,6 +239,26 @@
   color: white;
 }
 
+.icon-btn-edit-small {
+  width: 32px;
+  height: 32px;
+  min-height: auto;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: var(--info-bg);
+  color: var(--info);
+  border: none;
+  cursor: pointer;
+}
+
+.icon-btn-edit-small:hover {
+  background: var(--info);
+  color: white;
+}
+
 .calc-box {
   background: var(--primary-light);
   border-radius: var(--radius-lg);

@@ -26,6 +26,7 @@ const QuotationBuilder = () => {
 
   // Items State
   const [items, setItems] = useState([]);
+  const [editingItemId, setEditingItemId] = useState(null);
 
   // Add Item Draft State
   const [draftCategory, setDraftCategory] = useState('');
@@ -133,8 +134,8 @@ const QuotationBuilder = () => {
       return;
     }
 
-    const newItem = {
-      id: Date.now().toString(),
+    const itemPayload = {
+      id: editingItemId || Date.now().toString(),
       product_id: draftProduct,
       desc: draftDesc,
       qty: Number(draftQty),
@@ -143,14 +144,41 @@ const QuotationBuilder = () => {
       sgst_pct: Number(draftSgst)
     };
 
-    setItems([...items, newItem]);
-    
+    if (editingItemId) {
+      setItems(items.map(i => i.id === editingItemId ? itemPayload : i));
+      setEditingItemId(null);
+    } else {
+      setItems([...items, itemPayload]);
+    }
+
     // Reset Add Item Box
+    setDraftCategory('');
     setDraftProduct('');
     setDraftDesc('');
     setDraftQty(1);
     setDraftRate('');
+    setDraftCgst(9);
+    setDraftSgst(9);
   };
+
+  const startEditItem = (item) => {
+    setEditingItemId(item.id);
+    setDraftProduct(item.product_id || '');
+    setDraftDesc(item.desc || '');
+    setDraftQty(item.qty || 1);
+    setDraftRate(item.rate || '');
+    setDraftCgst(item.cgst_pct ?? 9);
+    setDraftSgst(item.sgst_pct ?? 9);
+
+    const product = products.find(p => p.id === item.product_id);
+    if (product) {
+      const category = categories.find(c => c.category_name === product.category);
+      if (category) {
+        setDraftCategory(category.id.toString());
+      }
+    }
+  };
+
 
   const removeItem = (itemId) => {
     setItems(items.filter(i => i.id !== itemId));
@@ -575,7 +603,7 @@ const QuotationBuilder = () => {
             </div>
 
             <button className="add-item-btn" onClick={addItem}>
-              <Plus size={18} /> Add Item
+              {editingItemId ? <CheckCircle size={18} /> : <Plus size={18} />} {editingItemId ? 'Update Item' : 'Add Item'}
             </button>
           </div>
 
@@ -624,7 +652,10 @@ const QuotationBuilder = () => {
                       <div style={{ fontWeight: 600 }}>₹{item.rate.toLocaleString()}</div>
                       <div style={{ color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 600 }}>+{item.cgst_pct + item.sgst_pct}%</div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                      <button className="icon-btn-edit-small" title="Edit Item" onClick={() => startEditItem(item)}>
+                        <Edit size={16} />
+                      </button>
                       <button className="icon-btn-delete-small" title="Delete Item" onClick={() => removeItem(item.id)}>
                         <Trash2 size={16} />
                       </button>
