@@ -185,15 +185,13 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     ]);
   });
 
-  // Calculate combined/representative GST rates for display
-  const uniqueCgstRates = [...new Set(items.map(i => i.cgst_pct || 0))];
-  const uniqueSgstRates = [...new Set(items.map(i => i.sgst_pct || 0))];
-  const cgstLabel = uniqueCgstRates.length === 1
-    ? `CGST @ ${uniqueCgstRates[0]}%` : 'CGST Total';
-  const sgstLabel = uniqueSgstRates.length === 1
-    ? `SGST @ ${uniqueSgstRates[0]}%` : 'SGST Total';
-  const cgstRateStr = uniqueCgstRates.length === 1 ? `${uniqueCgstRates[0]} %` : 'Mixed';
-  const sgstRateStr = uniqueSgstRates.length === 1 ? `${uniqueSgstRates[0]} %` : 'Mixed';
+  // Calculate total GST percentages by summing all item rates
+  const totalCgstPct = items.reduce((sum, item) => sum + (item.cgst_pct || 0), 0);
+  const totalSgstPct = items.reduce((sum, item) => sum + (item.sgst_pct || 0), 0);
+  const cgstLabel = `CGST @ ${totalCgstPct}%`;
+  const sgstLabel = `SGST @ ${totalSgstPct}%`;
+  const cgstRateStr = `${totalCgstPct}%`;
+  const sgstRateStr = `${totalSgstPct}%`;
 
   // Step 3: Taxable subtotal
   itemRows.push([
