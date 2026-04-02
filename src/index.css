@@ -16,6 +16,7 @@
   --secondary: #64748b;
   --bg-light: #F9FAFB;
   --card-bg: #ffffff;
+  --card-alt: #f8fafc;
   --text-main: #1e293b;
   --text-muted: #64748b;
   --input-bg: #F3F4F6;
@@ -45,15 +46,16 @@
 }
 
 html.dark-theme {
-  --bg-light: #0f172a;
-  --card-bg: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --input-bg: #334155;
-  --border-color: #475569;
-  --primary-navy: #93c5fd; 
+  --bg-light: #121212;
+  --card-bg: #1E1E1E;
+  --card-alt: #1A1A1A;
+  --text-main: #FFFFFF;
+  --text-muted: #B0B0B0;
+  --input-bg: #2A2A2A;
+  --border-color: #2A2A2A;
+  --primary-navy: #93c5fd;
   --primary-hover: #60a5fa;
-  --primary-light: #1e3a8a;
+  --primary-light: #1e40af;
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.2);
   --warning: #f59e0b;
@@ -86,7 +88,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: var(--primary-navy);
+  color: var(--text-main);
   margin-top: 0;
   font-weight: 600;
 }
@@ -203,7 +205,7 @@ button {
 }
 
 .detail-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -211,6 +213,12 @@ button {
   display: flex;
   flex-direction: column;
   gap: 32px;
+}
+
+html.dark-theme .detail-card {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-main);
 }
 
 .detail-hero {
@@ -328,7 +336,7 @@ button {
 }
 
 .spec-card:hover {
-  background: white;
+  background: var(--card-bg);
   border-color: var(--primary-navy);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -338,7 +346,7 @@ button {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: white;
+  background: var(--card-alt);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,5 +359,97 @@ button {
   html {
     font-size: 14px;
   }
+}
+
+/* Strong dark theme overrides for readability and contrast */
+html.dark-theme body {
+  background-color: var(--bg-light);
+  color: var(--text-main);
+}
+
+html.dark-theme .layout-container,
+html.dark-theme .main-wrapper,
+html.dark-theme .page-content-scroll {
+  background: var(--bg-light);
+}
+
+html.dark-theme .dashboard-header,
+html.dark-theme .dashboard-header.search-bar-row,
+html.dark-theme .detail-card,
+html.dark-theme .table-container,
+html.dark-theme .quote-table,
+html.dark-theme .inv-table-card,
+html.dark-theme .builder-panel,
+html.dark-theme .items-list-box,
+html.dark-theme .modal-content,
+html.dark-theme .modal-header,
+html.dark-theme .close-btn {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+html.dark-theme .table-row:nth-child(even),
+html.dark-theme .table-row:nth-child(odd),
+html.dark-theme .product-row:nth-child(even),
+html.dark-theme .product-row:nth-child(odd),
+html.dark-theme .quote-row:nth-child(even),
+html.dark-theme .quote-row:nth-child(odd),
+html.dark-theme .inv-table-row:nth-child(even),
+html.dark-theme .inv-table-row:nth-child(odd),
+html.dark-theme .item-row:nth-child(even),
+html.dark-theme .item-row:nth-child(odd) {
+  color: var(--text-main);
+}
+
+html.dark-theme .table-row:nth-child(even),
+html.dark-theme .product-row:nth-child(even),
+html.dark-theme .quote-row:nth-child(even),
+html.dark-theme .inv-table-row:nth-child(even),
+html.dark-theme .item-row:nth-child(even) {
+  background: var(--card-bg);
+}
+
+html.dark-theme .table-row:nth-child(odd),
+html.dark-theme .product-row:nth-child(odd),
+html.dark-theme .quote-row:nth-child(odd),
+html.dark-theme .inv-table-row:nth-child(odd),
+html.dark-theme .item-row:nth-child(odd) {
+  background: var(--card-alt);
+}
+
+html.dark-theme .title-text-main,
+html.dark-theme .page-title-display h1,
+html.dark-theme .page-subtitle,
+html.dark-theme .labe, 
+html.dark-theme .heading {
+  color: var(--text-main);
+}
+
+html.dark-theme .text-secondary,
+html.dark-theme .status-badge,
+html.dark-theme .text-muted,
+html.dark-theme .role,
+html.dark-theme .info-label,
+html.dark-theme .subtitle-text-main {
+  color: var(--text-muted);
+}
+
+html.dark-theme .header-search input,
+html.dark-theme .input-with-icon input,
+html.dark-theme .form-input,
+html.dark-theme .form-select,
+html.dark-theme .date-input,
+html.dark-theme .status-select {
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+
+html.dark-theme .table-header,
+html.dark-theme .product-table .table-header,
+html.dark-theme .quote-table .table-header,
+html.dark-theme .inv-table-header,
+html.dark-theme .items-header {
+  color: var(--text-main);
 }
 

@@ -17,7 +17,7 @@
 
 .dashboard-header {
   height: 80px;
-  background: white;
+  background: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -55,7 +55,7 @@
 }
 
 .header-search input:focus {
-  background: white;
+  background: var(--input-bg);
   border-color: var(--primary-navy);
   box-shadow: 0 4px 12px rgba(26, 62, 138, 0.08);
 }
@@ -94,7 +94,7 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--primary-navy);
+  color: var(--text-main);
 }
 
 .subtitle-text-main {
@@ -245,7 +245,7 @@
 
 .dashboard-header.search-bar-row {
   border-bottom: 1px solid var(--border-color);
-  background: white;
+  background: var(--card-bg);
 }
 
 .page-title-display h1 {

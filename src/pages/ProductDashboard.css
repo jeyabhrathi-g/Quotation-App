@@ -46,7 +46,7 @@
 }
 
 .table-container {
-  background: white;
+  background: var(--card-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border-color);
@@ -60,7 +60,7 @@
   background: var(--primary-light);
   border-bottom: 2px solid var(--primary-navy);
   align-items: center;
-  color: var(--primary-navy);
+  color: var(--text-main);
   font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -80,11 +80,11 @@
 }
 
 .product-row:nth-child(even) {
-  background: white;
+  background: var(--card-bg);
 }
 
 .product-row:nth-child(odd) {
-  background: #f8fafc;
+  background: var(--card-alt);
 }
 
 .product-row:hover {

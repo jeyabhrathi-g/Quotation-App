@@ -11,7 +11,7 @@
 }
 
 .inv-stat-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: var(--radius-lg);
   padding: 24px;
   display: flex;
@@ -61,7 +61,7 @@
 }
 
 .inv-table-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
@@ -75,7 +75,7 @@
   background: var(--primary-light);
   border-bottom: 2px solid var(--primary-navy);
   align-items: center;
-  color: var(--primary-navy);
+  color: var(--text-main);
   font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -95,11 +95,11 @@
 }
 
 .inv-table-row:nth-child(even) {
-  background: white;
+  background: var(--card-bg);
 }
 
 .inv-table-row:nth-child(odd) {
-  background: #f8fafc;
+  background: var(--card-alt);
 }
 
 .inv-table-row:hover {
