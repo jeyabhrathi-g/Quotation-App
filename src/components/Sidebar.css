@@ -157,3 +157,17 @@
     width: 260px;
   }
 }
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 950;
+  opacity: 0;
+  animation: fadeInBackdrop 0.25s forwards ease-in-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

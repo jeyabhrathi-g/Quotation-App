@@ -15,11 +15,18 @@ import { useAppContext } from '../context/AppContext';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import './Sidebar.css';
 
-const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen, setIsMobileSidebarOpen }) => {
   const { role, logout } = useAuth();
   const { appName } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleNavigation = (path) => {
+    if (isMobile && setIsMobileSidebarOpen) {
+      setIsMobileSidebarOpen(false);
+    }
+    navigate(path);
+  };
 
   const adminMenu = [
     { icon: <Users size={22} />, label: 'Customer', path: '/' },
@@ -55,10 +62,16 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen })
 
       <nav className="nav-menu">
         {menuItems.map((item, index) => (
-          <Link 
-            key={index} 
-            to={item.path} 
+          <Link
+            key={index}
+            to={item.path}
             className={`nav-link ${location.pathname === item.path ? 'nav-active' : ''}`}
+            onClick={(e) => {
+              if (isMobile) {
+                e.preventDefault();
+                handleNavigation(item.path);
+              }
+            }}
           >
             <span className="nav-icon">{item.icon}</span>
             {!isCollapsed && <span className="nav-label">{item.label}</span>}
@@ -67,7 +80,16 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen })
       </nav>
 
       <div className="sidebar-footer">
-        <Link to="/settings" className={`nav-link settings ${location.pathname === '/settings' ? 'nav-active' : ''}`}>
+        <Link
+          to="/settings"
+          className={`nav-link settings ${location.pathname === '/settings' ? 'nav-active' : ''}`}
+          onClick={(e) => {
+            if (isMobile) {
+              e.preventDefault();
+              handleNavigation('/settings');
+            }
+          }}
+        >
           <span className="nav-icon"><Settings size={22} /></span>
           {!isCollapsed && <span className="nav-label">Settings</span>}
         </Link>

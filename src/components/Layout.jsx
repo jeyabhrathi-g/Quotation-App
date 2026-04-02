@@ -49,7 +49,16 @@ const Layout = ({ children }) => {
           }}
           isMobile={isMobile}
           isMobileSidebarOpen={isMobileSidebarOpen}
+          setIsMobileSidebarOpen={setIsMobileSidebarOpen}
         />
+
+        {isMobile && isMobileSidebarOpen && (
+          <div
+            className="sidebar-backdrop"
+            onClick={() => setIsMobileSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
         <main className="main-wrapper">
           <header className="dashboard-header dashboard-header-aligned">
