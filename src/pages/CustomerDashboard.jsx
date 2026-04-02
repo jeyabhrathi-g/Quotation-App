@@ -4,20 +4,27 @@ import './CustomerDashboard.css';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import CustomerModal from '../components/CustomerModal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const CustomerDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const { searchQuery, setSearchQuery, setPageTitle } = useSearch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { setPageTitle } = useSearch();
 
   useEffect(() => {
     setPageTitle({ main: 'Customer Dashboard', sub: 'MANAGE CLIENTS' });
     fetchCustomers();
-  }, []);
+  }, [setPageTitle]);
+
+  useEffect(() => {
+    setSearchQuery('');
+    return () => setSearchQuery('');
+  }, [location.pathname]);
 
   const fetchCustomers = async () => {
     try {

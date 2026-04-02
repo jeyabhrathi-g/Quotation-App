@@ -12,7 +12,6 @@ const Layout = ({ children }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [pageTitle, setPageTitle] = useState({ main: '', sub: '' });
   const { user, logout } = useAuth();
 
@@ -35,7 +34,7 @@ const Layout = ({ children }) => {
   }, [isMobileSidebarOpen]);
 
   return (
-    <SearchContext.Provider value={{ searchQuery, setSearchQuery, setPageTitle }}>
+    <SearchContext.Provider value={{ setPageTitle }}>
       <div className={`layout-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         <Sidebar
           isCollapsed={isMobile ? !isMobileSidebarOpen : isSidebarCollapsed}

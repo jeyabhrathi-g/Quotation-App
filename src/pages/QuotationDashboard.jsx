@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FilePlus, Search, FileText, Calendar, Filter, Clock, CheckCircle, Package, AlertTriangle, X, Plus } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
@@ -8,9 +8,11 @@ import './QuotationDashboard.css';
 import '../pages/CustomerDashboard.css';
 
 const QuotationDashboard = () => {
+  const location = useLocation();
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { searchQuery, setSearchQuery, setPageTitle } = useSearch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { setPageTitle } = useSearch();
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('');
   const navigate = useNavigate();
@@ -22,7 +24,12 @@ const QuotationDashboard = () => {
   useEffect(() => {
     setPageTitle({ main: 'Quotation Dashboard', sub: 'SALES PIPELINE' });
     fetchQuotations();
-  }, []);
+  }, [setPageTitle]);
+
+  useEffect(() => {
+    setSearchQuery('');
+    return () => setSearchQuery('');
+  }, [location.pathname]);
 
   const fetchQuotations = async () => {
     try {

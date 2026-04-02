@@ -6,10 +6,11 @@ import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import ProductModal from '../components/ProductModal';
 import CategoryModal from '../components/CategoryModal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ProductDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -17,12 +18,18 @@ const ProductDashboard = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const { searchQuery, setSearchQuery, setPageTitle } = useSearch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { setPageTitle } = useSearch();
 
   useEffect(() => {
     setPageTitle({ main: 'Product Dashboard', sub: 'INVENTORY CONTROLS' });
     fetchProducts();
-  }, []);
+  }, [setPageTitle]);
+
+  useEffect(() => {
+    setSearchQuery('');
+    return () => setSearchQuery('');
+  }, [location.pathname]);
 
   const fetchProducts = async () => {
     try {

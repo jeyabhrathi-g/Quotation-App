@@ -2,17 +2,25 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, Download, Search, TrendingUp, CheckCircle, Eye } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
+import { useLocation } from 'react-router-dom';
 import './InvoiceDashboard.css';
 
 const InvoiceDashboard = () => {
+  const location = useLocation();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { searchQuery, setSearchQuery, setPageTitle } = useSearch();
+  const [searchQuery, setSearchQuery] = useState('');
+  const { setPageTitle } = useSearch();
 
   useEffect(() => {
     setPageTitle({ main: 'Invoice Management', sub: 'BILLING & SETTLEMENTS' });
     fetchInvoices();
-  }, []);
+  }, [setPageTitle]);
+
+  useEffect(() => {
+    setSearchQuery('');
+    return () => setSearchQuery('');
+  }, [location.pathname]);
 
   const fetchInvoices = async () => {
     try {
