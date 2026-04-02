@@ -29,7 +29,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen, s
   };
 
   const adminMenu = [
-    { icon: <Users size={22} />, label: 'Customer', path: '/' },
+    { icon: <Users size={22} />, label: 'Customer', path: '/customers' },
     { icon: <Package size={22} />, label: 'Product', path: '/products' },
     { icon: <FileText size={22} />, label: 'Quotation', path: '/quotations' },
     { icon: <Receipt size={22} />, label: 'Invoice', path: '/invoices' },

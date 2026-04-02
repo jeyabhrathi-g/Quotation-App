@@ -28,9 +28,10 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/customers" replace />} />
 
-      <Route path="/" element={
+      <Route path="/customers" element={
         <ProtectedRoute>
           <Layout>
             {role?.toLowerCase() === 'admin' ? <CustomerDashboard /> : <div>User Dashboard (Coming Soon)</div>}

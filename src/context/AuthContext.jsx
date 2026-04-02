@@ -9,18 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('ssv_user');
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-      setRole(parsedUser.role);
-    } else {
-      // DEFAULT ADMIN BYPASS FOR DEVELOPMENT
-      const adminBypass = { id: 'dev-admin', username: 'jeya', role: 'admin' };
-      setUser(adminBypass);
-      setRole('admin');
-      localStorage.setItem('ssv_user', JSON.stringify(adminBypass));
-    }
+    // Always start with no user - force login on app restart
+    setUser(null);
+    setRole(null);
     setLoading(false);
   }, []);
 
@@ -69,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setRole(null);
     localStorage.removeItem('ssv_user');
+    localStorage.removeItem('isAuth');
   };
 
   return (

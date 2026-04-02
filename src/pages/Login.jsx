@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAppContext } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 import { User, Lock, AlertCircle } from 'lucide-react';
 import './Login.css';
 
@@ -11,6 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const { appName } = useAppContext();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +21,16 @@ const Login = () => {
 
     const result = await login(username.trim(), password.trim());
     if (!result.success) {
-      setError(result.message);
+      setError('Invalid Username or Password');
+      setLoading(false);
+      return;
     }
+
+    setUsername('');
+    setPassword('');
+    localStorage.setItem('isAuth', 'true');
     setLoading(false);
+    navigate('/customers');
   };
 
   return (
