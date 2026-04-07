@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FilePlus, Search, FileText, Calendar, Filter, Clock, CheckCircle, Package, AlertTriangle, X, Plus } from 'lucide-react';
+import { FilePlus, Search, FileText, Calendar, Filter, Clock, CheckCircle, Package, AlertTriangle, X, Plus, Eye, Download } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import { generateInvoiceNumber, generateInvoicePDF } from '../utils/invoiceGenerator';
@@ -155,6 +155,38 @@ const QuotationDashboard = () => {
     }
   };
 
+  const handleViewPDF = (url, quotationNo) => {
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      alert(`PDF URL not available for quotation ${quotationNo}.`);
+    }
+  };
+
+  const handleDownloadPDF = async (url, quotationNo) => {
+    if (url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `${quotationNo}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+      } catch (err) {
+        console.error('Download failed:', err);
+        // Fallback: open in new tab if download fails
+        window.open(url, '_blank');
+      }
+    } else {
+      alert(`PDF URL not available for quotation ${quotationNo}.`);
+    }
+  };
+
   return (
     <div className="dashboard-content-wrapper">
 
@@ -295,8 +327,9 @@ const QuotationDashboard = () => {
             <div className="col">QUOTE NUMBER</div>
             <div className="col">CREATION DATE</div>
             <div className="col">CUSTOMER NAME</div>
-            <div className="col">NET AMOUNT</div>
-            <div className="col">STATUS</div>
+            <div className="col" style={{ textAlign: 'right' }}>NET AMOUNT</div>
+            <div className="col" style={{ textAlign: 'center' }}>STATUS</div>
+            <div className="col" style={{ textAlign: 'center' }}>ACTION</div>
           </div>
 
           {loading ? (
@@ -333,10 +366,10 @@ const QuotationDashboard = () => {
                     <div className="col" data-label="Customer Name">
                       <span className="customer-name-bold">{quote.customers?.name || '-'}</span>
                     </div>
-                    <div className="col" data-label="Net Amount">
+                    <div className="col" data-label="Net Amount" style={{ textAlign: 'right' }}>
                       <span className="amount-text">₹{quote.total != null ? Math.round(quote.total).toLocaleString('en-IN') : '0'}</span>
                     </div>
-                    <div className="col" data-label="Status">
+                    <div className="col" data-label="Status" style={{ textAlign: 'center' }}>
                       <span
                         className={`status-pill ${quote.status?.toLowerCase()}`}
                         style={{ cursor: isClickable ? 'pointer' : 'default' }}
@@ -344,6 +377,26 @@ const QuotationDashboard = () => {
                       >
                         {quote.status}
                       </span>
+                    </div>
+                    <div className="col" data-label="Action" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      {quote.pdf_url && (
+                        <>
+                          <button
+                            className="quote-view-btn"
+                            onClick={() => handleViewPDF(quote.pdf_url, quote.quotation_no)}
+                            title="View Quotation PDF"
+                          >
+                            <Eye size={14} /> View
+                          </button>
+                          <button
+                            className="quote-download-btn"
+                            onClick={() => handleDownloadPDF(quote.pdf_url, quote.quotation_no)}
+                            title="Download Quotation PDF"
+                          >
+                            <Download size={14} /> Download
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );

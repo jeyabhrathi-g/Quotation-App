@@ -109,7 +109,7 @@
 
 .quote-table .table-header {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1.8fr 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr 1.8fr 1fr 1fr 1.2fr;
   padding: 16px 24px;
   background: var(--primary-light);
   border-bottom: 2px solid var(--primary-navy);
@@ -122,7 +122,7 @@
 
 .quote-row {
   display: grid;
-  grid-template-columns: 1.2fr 1fr 1.8fr 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr 1.8fr 1fr 1fr 1.2fr;
   padding: 16px 24px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
@@ -169,9 +169,30 @@
 .status-pill.draft { background: var(--input-bg); color: var(--text-muted); }
 .status-pill.closed { background: var(--success-bg); color: #065f46; }
 
+.quote-view-btn, .quote-download-btn {
+  background: var(--primary-light);
+  color: var(--primary-navy);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.quote-view-btn:hover, .quote-download-btn:hover {
+  background: var(--primary-navy);
+  color: white;
+}
+
 @media (max-width: 1024px) {
   .quote-table .table-header, .quote-row {
-    grid-template-columns: 1fr 1fr 1.5fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1.5fr 1fr 1fr 1.2fr;
     padding: 12px 16px;
   }
 }
@@ -195,5 +216,15 @@
     font-weight: 700;
     text-transform: uppercase;
     margin-bottom: 4px;
+  }
+
+  .quote-row > div[data-label="Action"] {
+    display: flex !important;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .quote-row > div[data-label="Action"]::before {
+    display: block;
   }
 }

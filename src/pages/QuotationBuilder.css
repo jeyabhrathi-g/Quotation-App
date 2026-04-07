@@ -93,8 +93,8 @@
   width: 100%;
   padding: 14px 16px;
   border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  background: white;
   font-size: 0.95rem;
   font-weight: 500;
   outline: none;
@@ -109,6 +109,14 @@
   border-color: var(--primary-navy);
   background: white;
   box-shadow: 0 0 0 4px rgba(26, 62, 138, 0.08);
+}
+
+.form-input:disabled, .form-select:disabled,
+.form-input[readonly], .form-select[readonly] {
+  background: var(--input-bg);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border-color: var(--border-color);
 }
 
 .item-add-box {
