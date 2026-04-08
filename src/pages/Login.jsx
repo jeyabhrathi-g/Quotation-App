@@ -54,25 +54,25 @@ const Login = () => {
 
           <div className="input-group">
             <label htmlFor="username"><User size={18} /> Username</label>
-            <input 
-              type="text" 
-              id="username" 
-              placeholder="Enter username" 
-              value={username} 
-              onChange={(e) => setUsername(e.target.value)} 
-              required 
+            <input
+              type="text"
+              id="username"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
             />
           </div>
 
           <div className="input-group">
             <label htmlFor="password"><Lock size={18} /> Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              placeholder="Enter password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              id="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 

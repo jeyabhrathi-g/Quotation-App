@@ -24,7 +24,7 @@ const CustomerDetails = () => {
       setCustomer(data);
     } catch (error) {
       console.error('Error:', error);
-      navigate('/');
+      navigate('/customers');
     } finally {
       setLoading(false);
     }
@@ -37,14 +37,14 @@ const CustomerDetails = () => {
   return (
     <div className="dashboard-content-wrapper">
       <div className="detail-header-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <button className="back-link" onClick={() => navigate('/')}>
+        <button className="back-link" onClick={() => navigate('/customers')}>
           <ArrowLeft size={18} />
-          <span>Back to Customers</span>
+          <span>Back to Customer</span>
         </button>
-        
+
         <div className="detail-actions">
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             style={{ borderRadius: '999px', padding: '12px 28px', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'var(--primary-navy)', color: 'white', border: 'none', fontWeight: 600 }}
             onClick={() => setIsEditModalOpen(true)}
           >
