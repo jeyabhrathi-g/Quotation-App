@@ -155,35 +155,24 @@ const QuotationDashboard = () => {
     }
   };
 
-  const handleViewPDF = (url, quotationNo) => {
-    if (url) {
-      window.open(url, '_blank');
+  const handleViewPDF = (id) => {
+    if (id) {
+      window.open(`/api/quotation-pdf?id=${id}`, '_blank');
     } else {
-      alert(`PDF URL not available for quotation ${quotationNo}.`);
+      alert('Quotation ID not available.');
     }
   };
 
-  const handleDownloadPDF = async (url, quotationNo) => {
-    if (url) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${quotationNo}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-      } catch (err) {
-        console.error('Download failed:', err);
-        // Fallback: open in new tab if download fails
-        window.open(url, '_blank');
-      }
+  const handleDownloadPDF = (id, quotationNo) => {
+    if (id) {
+      const link = document.createElement('a');
+      link.href = `/api/quotation-pdf?id=${id}&download=true`;
+      link.download = `${quotationNo}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } else {
-      alert(`PDF URL not available for quotation ${quotationNo}.`);
+      alert('Quotation ID not available.');
     }
   };
 
@@ -383,14 +372,14 @@ const QuotationDashboard = () => {
                         <>
                           <button
                             className="quote-view-btn"
-                            onClick={() => handleViewPDF(quote.pdf_url, quote.quotation_no)}
+                            onClick={() => handleViewPDF(quote.id)}
                             title="View Quotation PDF"
                           >
                             <Eye size={14} /> View
                           </button>
                           <button
                             className="quote-download-btn"
-                            onClick={() => handleDownloadPDF(quote.pdf_url, quote.quotation_no)}
+                            onClick={() => handleDownloadPDF(quote.id, quote.quotation_no)}
                             title="Download Quotation PDF"
                           >
                             <Download size={14} /> Download

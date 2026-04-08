@@ -1,7 +1,7 @@
 .sidebar-nav {
   height: 100vh;
   width: 260px;
-  background: var(--primary-navy);
+  background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -80,9 +80,10 @@
 }
 
 .nav-active {
-  background: var(--primary-light) !important;
-  color: var(--primary-navy) !important;
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  font-weight: 700;
+  box-shadow: inset 4px 0 0 0 white; /* Prominent white indicator */
 }
 
 .nav-icon {
@@ -110,12 +111,12 @@
   width: 100%;
   border: none;
   justify-content: flex-start;
-  color: #fda4af;
+  color: #ef4444; /* Slightly darker, more professional red */
 }
 
 .logout-nav:hover {
-  background: rgba(251, 113, 133, 0.1);
-  color: #fb7185;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
 }
 
 .sidebar-collapsed .nav-link {
@@ -168,6 +169,11 @@
 }
 
 @keyframes fadeInBackdrop {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

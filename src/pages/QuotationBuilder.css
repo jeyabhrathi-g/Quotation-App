@@ -89,7 +89,8 @@
   color: var(--text-main);
 }
 
-.form-input, .form-select {
+.form-input,
+.form-select {
   width: 100%;
   padding: 14px 16px;
   border-radius: var(--radius-md);
@@ -105,14 +106,17 @@
   appearance: auto;
 }
 
-.form-input:focus, .form-select:focus {
+.form-input:focus,
+.form-select:focus {
   border-color: var(--primary-navy);
   background: white;
   box-shadow: 0 0 0 4px rgba(26, 62, 138, 0.08);
 }
 
-.form-input:disabled, .form-select:disabled,
-.form-input[readonly], .form-select[readonly] {
+.form-input:disabled,
+.form-select:disabled,
+.form-input[readonly],
+.form-select[readonly] {
   background: var(--input-bg);
   color: var(--text-muted);
   cursor: not-allowed;
@@ -129,8 +133,26 @@
   gap: 16px;
 }
 
+.add-item-btn {
+  background: var(--primary-navy);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: 100%; /* Ensure it spans the box */
+}
+
 .add-item-btn:hover {
   background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .action-row {
@@ -140,7 +162,8 @@
   padding-top: 24px;
 }
 
-.save-draft-btn, .save-pdf-btn {
+.save-draft-btn,
+.save-pdf-btn {
   padding: 14px;
   border-radius: var(--radius-md);
   font-weight: 700;
@@ -163,8 +186,14 @@
   color: white;
 }
 
-.save-draft-btn:hover { background: #fee2e2; }
-.save-pdf-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.save-draft-btn:hover {
+  background: #fee2e2;
+}
+
+.save-pdf-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
 
 .items-list-box {
   background: var(--card-bg);
@@ -278,12 +307,29 @@
 }
 
 @media (max-width: 1024px) {
-  .builder-main { grid-template-columns: 1fr; }
+  .builder-main {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-  .builder-panel, .items-list-box, .calc-box { padding: 20px; }
-  .form-row { grid-template-columns: 1fr; }
-  .items-header { display: none; }
-  .item-row { grid-template-columns: 1fr; gap: 8px; }
+
+  .builder-panel,
+  .items-list-box,
+  .calc-box {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .items-header {
+    display: none;
+  }
+
+  .item-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
 }

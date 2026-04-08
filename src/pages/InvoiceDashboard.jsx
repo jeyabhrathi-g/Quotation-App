@@ -54,35 +54,24 @@ const InvoiceDashboard = () => {
     totalValue: invoices.reduce((s, i) => s + (i.total || 0), 0)
   }), [invoices]);
 
-  const handleDownloadPDF = async (url, invoiceNo) => {
-    if (url) {
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${invoiceNo}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-      } catch (err) {
-        console.error('Download failed:', err);
-        // Fallback: open in new tab if download fails
-        window.open(url, '_blank');
-      }
+  const handleViewPDF = (id) => {
+    if (id) {
+      window.open(`/api/invoice-pdf?id=${id}`, '_blank');
     } else {
-      alert('PDF URL not available for this invoice.');
+      alert('Invoice ID not available.');
     }
   };
 
-  const handleViewPDF = (url) => {
-    if (url) {
-      window.open(url, '_blank');
+  const handleDownloadPDF = (id, invoiceNo) => {
+    if (id) {
+      const link = document.createElement('a');
+      link.href = `/api/invoice-pdf?id=${id}&download=true`;
+      link.download = `${invoiceNo}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } else {
-      alert('PDF URL not available for this invoice.');
+      alert('Invoice ID not available.');
     }
   };
 
@@ -167,14 +156,14 @@ const InvoiceDashboard = () => {
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                 <button
                   className="inv-view-btn"
-                  onClick={() => handleViewPDF(inv.invoice_pdf_url)}
+                  onClick={() => handleViewPDF(inv.id)}
                   title="View Invoice PDF"
                 >
                   <Eye size={14} /> View
                 </button>
                 <button
                   className="inv-download-btn"
-                  onClick={() => handleDownloadPDF(inv.invoice_pdf_url, inv.invoice_no)}
+                  onClick={() => handleDownloadPDF(inv.id, inv.invoice_no)}
                   title="Download Invoice PDF"
                 >
                   <Download size={14} /> Download

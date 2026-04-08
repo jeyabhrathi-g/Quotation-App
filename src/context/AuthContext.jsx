@@ -9,9 +9,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Always start with no user - force login on app restart
-    setUser(null);
-    setRole(null);
+    // Check for stored session on mount
+    const storedUser = localStorage.getItem('ssv_user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setRole(parsedUser.role);
+      } catch (err) {
+        console.error('Failed to parse stored user:', err);
+        localStorage.removeItem('ssv_user');
+      }
+    }
     setLoading(false);
   }, []);
 
@@ -31,9 +40,9 @@ export const AuthProvider = ({ children }) => {
         throw new Error(`Username "${username}" not found. Check for hidden spaces in Supabase.`);
       }
 
-      console.log('Diagnostic: User found, checking password...', { 
-        inputPassword: password, 
-        dbPassword: userRow.password 
+      console.log('Diagnostic: User found, checking password...', {
+        inputPassword: password,
+        dbPassword: userRow.password
       });
 
       // 2. Check the password
@@ -41,12 +50,12 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Invalid password for this user.');
       }
 
-      const userData = { 
-        id: userRow.id, 
-        username: userRow.user_name, 
-        role: userRow.role?.toLowerCase() || 'user' 
+      const userData = {
+        id: userRow.id,
+        username: userRow.user_name,
+        role: userRow.role?.toLowerCase() || 'user'
       };
-      
+
       setUser(userData);
       setRole(userData.role);
       localStorage.setItem('ssv_user', JSON.stringify(userData));
