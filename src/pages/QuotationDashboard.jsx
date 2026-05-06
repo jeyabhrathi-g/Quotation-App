@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FilePlus, Search, FileText, Calendar, Filter, Clock, CheckCircle, Package, AlertTriangle, X, Plus, Eye, Download } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
+import Pagination from '../components/Pagination';
+import { sentenceCase } from '../utils/stringUtils';
 import { generateInvoiceNumber, generateInvoicePDF } from '../utils/invoiceGenerator';
 import './QuotationDashboard.css';
 import '../pages/CustomerDashboard.css';
@@ -11,7 +13,9 @@ const QuotationDashboard = () => {
   const location = useLocation();
   const [quotations, setQuotations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const itemsPerPage = 8;
   const { setPageTitle } = useSearch();
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('');
@@ -72,6 +76,19 @@ const QuotationDashboard = () => {
       return true;
     });
   }, [quotations, searchQuery, statusFilter, dateFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredQuotations.length / itemsPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  const visibleQuotations = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredQuotations.slice(start, start + itemsPerPage);
+  }, [filteredQuotations, currentPage]);
 
   const handleQuoteClick = (quote) => {
     if (quote.status === 'Draft') {
@@ -277,9 +294,9 @@ const QuotationDashboard = () => {
         <div className="action-row-left" style={{ flex: '1 1 250px' }}>
           <div className="local-search-box" style={{ position: 'relative', width: '100%', maxWidth: '350px' }}>
             <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input 
-              type="text" 
-              placeholder="Search quotations..." 
+            <input
+              type="text"
+              placeholder="Search quotations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '999px', border: '1px solid var(--border-color)', outline: 'none', background: 'white', color: 'var(--text-main)' }}
@@ -327,7 +344,7 @@ const QuotationDashboard = () => {
             <div className="table-status">No matching quotations found.</div>
           ) : (
             <div className="table-body">
-              {filteredQuotations.map((quote) => {
+              {visibleQuotations.map((quote) => {
                 const isPending = quote.status === 'Pending';
                 const isDraft = quote.status === 'Draft';
                 const isClickable = isPending || isDraft;
@@ -353,7 +370,7 @@ const QuotationDashboard = () => {
                       <span className="date-text">{new Date(quote.created_at).toLocaleDateString('en-GB')}</span>
                     </div>
                     <div className="col" data-label="Customer Name">
-                      <span className="customer-name-bold">{quote.customers?.name || '-'}</span>
+                      <span className="customer-name-bold">{quote.customers?.name ? sentenceCase(quote.customers.name) : '-'}</span>
                     </div>
                     <div className="col" data-label="Net Amount" style={{ textAlign: 'right' }}>
                       <span className="amount-text">₹{quote.total != null ? Math.round(quote.total).toLocaleString('en-IN') : '0'}</span>
@@ -364,7 +381,7 @@ const QuotationDashboard = () => {
                         style={{ cursor: isClickable ? 'pointer' : 'default' }}
                         onClick={() => isClickable && handleQuoteClick(quote)}
                       >
-                        {quote.status}
+                        {sentenceCase(quote.status)}
                       </span>
                     </div>
                     <div className="col" data-label="Action" style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
@@ -393,6 +410,12 @@ const QuotationDashboard = () => {
             </div>
           )}
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredQuotations.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

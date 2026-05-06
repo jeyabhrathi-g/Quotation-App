@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FileText, Download, Search, TrendingUp, CheckCircle, Eye } from 'lucide-react';
+import { FileText, Download, Search, TrendingUp, CheckCircle, Eye, Send } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
+import Pagination from '../components/Pagination';
+import { sentenceCase } from '../utils/stringUtils';
 import { useLocation } from 'react-router-dom';
 import './InvoiceDashboard.css';
 
@@ -9,7 +11,10 @@ const InvoiceDashboard = () => {
   const location = useLocation();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sharingInvoiceId, setSharingInvoiceId] = useState(null);
+  const itemsPerPage = 8;
   const { setPageTitle } = useSearch();
 
   useEffect(() => {
@@ -27,7 +32,7 @@ const InvoiceDashboard = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('invoices')
-        .select('*, customers(name)')
+        .select('*, customers(name, phone)')
         .order('created_at', { ascending: false });
       if (error) throw error;
       setInvoices(data || []);
@@ -47,6 +52,19 @@ const InvoiceDashboard = () => {
       (inv.customers?.name?.toLowerCase() || '').includes(q)
     );
   }, [invoices, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / itemsPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  const visibleInvoices = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredInvoices.slice(start, start + itemsPerPage);
+  }, [filteredInvoices, currentPage]);
 
   const stats = useMemo(() => ({
     total: invoices.length,
@@ -73,6 +91,71 @@ const InvoiceDashboard = () => {
     } else {
       alert('Invoice ID not available.');
     }
+  };
+
+  const handleShareInvoice = async (inv) => {
+    const { id, invoice_no: invoiceNo, customers } = inv;
+    console.log('Share button clicked for Invoice:', invoiceNo);
+    if (!id) {
+      alert('Invoice ID not available.');
+      return;
+    }
+
+    setSharingInvoiceId(id);
+    try {
+      const response = await fetch(`/api/share-invoice-whatsapp?id=${id}`, {
+        method: 'POST'
+      });
+      const text = await response.text();
+      let result;
+      try {
+        result = JSON.parse(text);
+      } catch {
+        result = { error: text || 'Unexpected response from server' };
+      }
+
+      if (!response.ok) {
+        const msg = result.error || 'Unable to send invoice via WhatsApp.';
+        const detail = result.details ? ` Details: ${JSON.stringify(result.details)}` : '';
+        const fullError = `${msg}${detail}`;
+        
+        // Provide helpful guidance for common errors
+        if (fullError.includes('not configured') || fullError.includes('TWILIO')) {
+          handleFallbackShare(id, invoiceNo, customers?.phone);
+          return;
+        } else if (fullError.includes('phone') || fullError.includes('invalid')) {
+          throw new Error(`${msg}\n\nEnsure the customer's phone number is:\n- Entered correctly in the customer profile\n- In format: 10 digits (e.g., 9876543210)\n- India-based or update country code in settings`);
+        }
+        throw new Error(fullError);
+      }
+
+      alert(`✓ Invoice ${invoiceNo} sent to customer via WhatsApp!`);
+    } catch (err) {
+      console.error('WhatsApp share failed:', err);
+      alert(`Failed to send invoice via WhatsApp:\n\n${err.message || 'Unknown error'}`);
+    } finally {
+      setSharingInvoiceId(null);
+    }
+  };
+
+  const handleFallbackShare = (id, invoiceNo, phone) => {
+    handleDownloadPDF(id, invoiceNo);
+    
+    let phoneStr = '';
+    if (phone) {
+      phoneStr = phone.replace(/\D/g, '');
+      if (phoneStr.length === 10) phoneStr = `91${phoneStr}`;
+    }
+    
+    const message = encodeURIComponent(`Please find your invoice attached.\nInvoice No: ${invoiceNo}`);
+    const waUrl = phoneStr ? `https://wa.me/${phoneStr}?text=${message}` : `https://wa.me/?text=${message}`;
+    
+    // Open WhatsApp first to reduce the chance of the popup blocker stopping it
+    window.open(waUrl, '_blank');
+    
+    setTimeout(() => {
+      alert(`WhatsApp API is not configured.\n\nThe PDF is being downloaded. A WhatsApp chat will open now.\nPlease manually attach the downloaded PDF (${invoiceNo}.pdf) to the chat.`);
+    }, 100);
   };
 
   return (
@@ -142,11 +225,11 @@ const InvoiceDashboard = () => {
             <p>No invoices found. Create one from a Pending Quotation.</p>
           </div>
         ) : (
-          filteredInvoices.map((inv) => (
+          visibleInvoices.map((inv) => (
             <div key={inv.id} className="inv-table-row">
               <div className="inv-inv-no" data-label="Invoice No">{inv.invoice_no}</div>
               <div className="inv-quote-no" data-label="Quotation No">{inv.quotation_no || '-'}</div>
-              <div className="inv-customer" data-label="Customer">{inv.customers?.name || '-'}</div>
+              <div className="inv-customer" data-label="Customer">{inv.customers?.name ? sentenceCase(inv.customers.name) : '-'}</div>
               <div className="inv-date" data-label="Date">
                 {inv.invoice_date
                   ? new Date(inv.invoice_date).toLocaleDateString('en-GB')
@@ -162,6 +245,14 @@ const InvoiceDashboard = () => {
                   <Eye size={14} /> View
                 </button>
                 <button
+                  className="inv-share-btn"
+                  onClick={() => handleShareInvoice(inv)}
+                  title="Share Invoice via WhatsApp"
+                  disabled={sharingInvoiceId === inv.id}
+                >
+                  <Send size={14} /> {sharingInvoiceId === inv.id ? 'Sending...' : 'Share'}
+                </button>
+                <button
                   className="inv-download-btn"
                   onClick={() => handleDownloadPDF(inv.id, inv.invoice_no)}
                   title="Download Invoice PDF"
@@ -173,6 +264,12 @@ const InvoiceDashboard = () => {
           ))
         )}
       </div>
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filteredInvoices.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

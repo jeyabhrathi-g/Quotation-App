@@ -5,6 +5,7 @@ import { supabase } from '../supabaseClient';
 import { useAppContext } from '../context/AppContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { sentenceCase } from '../utils/stringUtils';
 import './QuotationBuilder.css';
 
 const QuotationBuilder = () => {
@@ -123,8 +124,12 @@ const QuotationBuilder = () => {
 
     const prod = products.find(p => p.id === pId);
     if (prod) {
+      const productGst = Number(prod.gst ?? prod.GST ?? 0) || 0;
+      const gstHalf = productGst / 2;
       setDraftRate(prod.rate || 0);
       setDraftDesc(`${prod.sub_category || ''} - ${prod.Description || ''}`);
+      setDraftCgst(gstHalf);
+      setDraftSgst(gstHalf);
     }
   };
 
@@ -557,7 +562,7 @@ const QuotationBuilder = () => {
             <label className="form-label">Select Customer</label>
             <select className="form-select" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
               <option value="">-- Select Customer --</option>
-              {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {customers.map(c => <option key={c.id} value={c.id}>{sentenceCase(c.name)}</option>)}
             </select>
           </div>
 
@@ -568,7 +573,7 @@ const QuotationBuilder = () => {
               <label className="form-label">Category</label>
               <select className="form-select" value={draftCategory} onChange={(e) => setDraftCategory(e.target.value)}>
                 <option value="">- Category -</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.category_name}</option>)}
+                {categories.map(c => <option key={c.id} value={c.id}>{sentenceCase(c.category_name)}</option>)}
               </select>
             </div>
 
@@ -576,7 +581,11 @@ const QuotationBuilder = () => {
               <label className="form-label">Product / Description</label>
               <select className="form-select" value={draftProduct} onChange={handleProductSelect}>
                 <option value="">- Sub Category -</option>
-                {filteredProducts.map(p => <option key={p.id} value={p.id}>{p.sub_category} - {p.Description}</option>)}
+                {filteredProducts.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {sentenceCase(p.sub_category)} - {sentenceCase(p.Description)}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -646,7 +655,7 @@ const QuotationBuilder = () => {
                 items.map((item, idx) => (
                   <div key={item.id} className="item-row">
                     <div style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{idx + 1}</div>
-                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{item.desc}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{sentenceCase(item.desc)}</div>
                     <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.qty}</div>
                     <div style={{ textAlign: 'right', fontSize: '0.85rem' }}>
                       <div style={{ fontWeight: 600 }}>₹{item.rate.toLocaleString()}</div>

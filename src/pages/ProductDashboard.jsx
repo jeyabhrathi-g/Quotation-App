@@ -6,6 +6,8 @@ import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import ProductModal from '../components/ProductModal';
 import CategoryModal from '../components/CategoryModal';
+import Pagination from '../components/Pagination';
+import { sentenceCase } from '../utils/stringUtils';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const ProductDashboard = () => {
@@ -13,12 +15,14 @@ const ProductDashboard = () => {
   const location = useLocation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const itemsPerPage = 8;
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const { setPageTitle } = useSearch();
 
   useEffect(() => {
@@ -57,6 +61,19 @@ const ProductDashboard = () => {
       (p.Description && p.Description.toLowerCase().includes(query))
     );
   }, [products, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  const visibleProducts = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(start, start + itemsPerPage);
+  }, [filteredProducts, currentPage]);
 
   const handleAddProduct = () => {
     setSelectedProduct(null);
@@ -132,14 +149,14 @@ const ProductDashboard = () => {
             <div className="table-status">No items found in catalog.</div>
           ) : (
             <div className="table-body">
-              {filteredProducts.map((product) => (
+              {visibleProducts.map((product) => (
                 <div key={product.id} className="table-row product-row" onClick={() => navigate(`/products/${product.id}`)} style={{ cursor: 'pointer' }}>
                   <div className="col cat-col" data-label="Category">
-                    <span className="category-tag-badge">{product.category}</span>
+                    <span className="category-tag-badge">{sentenceCase(product.category)}</span>
                   </div>
 
                   <div className="col name-col" data-label="Sub Category">
-                    <span className="product-name-bold clickable">{product.sub_category}</span>
+                    <span className="product-name-bold clickable">{sentenceCase(product.sub_category)}</span>
                   </div>
 
                   <div className="col specs-col" data-label="Specs (Phase/RPM)">
@@ -162,6 +179,12 @@ const ProductDashboard = () => {
             </div>
           )}
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredProducts.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {isProductModalOpen && (

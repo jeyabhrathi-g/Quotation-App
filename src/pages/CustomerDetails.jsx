@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Phone, Mail, MapPin, Hash, Edit2, Trash2, ShieldAlert } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import CustomerModal from '../components/CustomerModal';
+import { sentenceCase } from '../utils/stringUtils';
 import './CustomerDashboard.css';
 
 const CustomerDetails = () => {
@@ -58,10 +59,10 @@ const CustomerDetails = () => {
         <div className="detail-card">
           <div className="detail-hero">
             <div className="avatar-lg">
-              {customer?.name?.charAt(0).toUpperCase()}
+              {sentenceCase(customer?.name).charAt(0)}
             </div>
             <div className="hero-content">
-              <h1 className="hero-title">{customer?.name}</h1>
+              <h1 className="hero-title">{sentenceCase(customer?.name)}</h1>
               <p className="hero-subtitle">
                 Customer since {new Date(customer?.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
@@ -102,7 +103,7 @@ const CustomerDetails = () => {
                 <div className="info-icon"><MapPin size={18} /></div>
                 <div className="info-text">
                   <span className="info-label">Billing Address</span>
-                  <span className="info-value address">{customer?.address}</span>
+                  <span className="info-value address">{sentenceCase(customer?.address)}</span>
                 </div>
               </div>
             </div>

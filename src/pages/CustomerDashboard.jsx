@@ -4,6 +4,8 @@ import './CustomerDashboard.css';
 import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import CustomerModal from '../components/CustomerModal';
+import Pagination from '../components/Pagination';
+import { sentenceCase } from '../utils/stringUtils';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const CustomerDashboard = () => {
@@ -11,9 +13,11 @@ const CustomerDashboard = () => {
   const location = useLocation();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const itemsPerPage = 8;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const { setPageTitle } = useSearch();
 
   useEffect(() => {
@@ -52,6 +56,19 @@ const CustomerDashboard = () => {
       (c.email && c.email.toLowerCase().includes(query))
     );
   }, [customers, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / itemsPerPage));
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+
+  const visibleCustomers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredCustomers.slice(start, start + itemsPerPage);
+  }, [filteredCustomers, currentPage]);
 
   const handleAddCustomer = () => {
     setSelectedCustomer(null);
@@ -115,14 +132,14 @@ const CustomerDashboard = () => {
             <div className="table-status">No customers found matching your criteria.</div>
           ) : (
             <div className="table-body">
-              {filteredCustomers.map((customer) => (
+              {visibleCustomers.map((customer) => (
                 <div key={customer.id} className="table-row simple-view" onClick={() => navigate(`/customers/${customer.id}`)} style={{ cursor: 'pointer' }}>
                   <div className="col profile">
                     <div className="avatar">
-                      {customer.name.charAt(0).toUpperCase()}
+                      {sentenceCase(customer.name).charAt(0)}
                     </div>
                     <div className="customer-details-text">
-                      <span className="customer-name-text clickable">{customer.name}</span>
+                      <span className="customer-name-text clickable">{sentenceCase(customer.name)}</span>
                     </div>
                   </div>
 
@@ -131,13 +148,19 @@ const CustomerDashboard = () => {
                   </div>
 
                   <div className="col address" data-label="Address">
-                    <span className="address-text">{customer.address}</span>
+                    <span className="address-text">{sentenceCase(customer.address)}</span>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredCustomers.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {isModalOpen && (

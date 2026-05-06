@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Tag, Info, Cpu, Recycle, Zap, HardDrive } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { sentenceCase } from '../utils/stringUtils';
 import './CustomerModal.css'; // Reuse form patterns
 
 const ProductModal = ({ isOpen, product, onClose }) => {
@@ -12,6 +13,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
     steel: 'MS',
     energy: 'Gas',
     rate: '',
+    gst: '',
     Description: ''
   });
   const [categories, setCategories] = useState([]);
@@ -32,6 +34,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         steel: product.steel || 'MS',
         energy: product.energy || 'Gas',
         rate: product.rate || '',
+        gst: product.gst ?? product.GST ?? '',
         Description: product.Description || ''
       });
     } else {
@@ -43,6 +46,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         steel: 'MS',
         energy: 'Gas',
         rate: '',
+        gst: '',
         Description: ''
       });
     }
@@ -65,6 +69,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
     if (!formData.category.trim()) return 'Check Category';
     if (!formData.sub_category.trim()) return 'Check Sub Category Name';
     if (!formData.rate || isNaN(formData.rate)) return 'Check Base Rate (Must be a number)';
+    if (formData.gst === '' || isNaN(formData.gst)) return 'Check GST % (Must be a number)';
     if (!formData.steel) return 'Check Steel Type';
     if (!formData.energy) return 'Check Energy Type';
     return null;
@@ -90,6 +95,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         steel: formData.steel,
         energy: formData.energy,
         rate: parseFloat(formData.rate),
+        gst: parseFloat(formData.gst),
         Description: formData.Description.trim()
       };
 
@@ -147,7 +153,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
                   <option value="">-- Select Category --</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.category_name}>
-                      {cat.category_name}
+                      {sentenceCase(cat.category_name)}
                     </option>
                   ))}
                 </select>
@@ -221,6 +227,21 @@ const ProductModal = ({ isOpen, product, onClose }) => {
                   <option value="Gas">Gas</option>
                   <option value="Electric">Electric</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>GST (%) <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <Tag size={18} className="field-icon" style={{ transform: 'rotate(90deg)' }} />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Enter GST %"
+                  value={formData.gst}
+                  onChange={(e) => setFormData({ ...formData, gst: e.target.value })}
+                  required
+                />
               </div>
             </div>
 

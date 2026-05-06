@@ -31,22 +31,43 @@ export default async (req, res) => {
       return res.status(404).json({ error: 'PDF not available for this invoice' });
     }
 
-    const response = await fetch(invoice.invoice_pdf_url);
+    const filePath = `invoices/${invoice.invoice_no}.pdf`;
+    let buffer;
+    let downloadError = null;
 
-    if (!response.ok) {
-      return res.status(404).json({ error: 'PDF file not found in storage' });
+    try {
+      const { data: fileData, error: storageError } = await supabase.storage
+        .from('invoice_pdfs')
+        .download(filePath);
+
+      if (storageError || !fileData) {
+        downloadError = storageError || new Error('Unable to download file from storage');
+      } else {
+        const arrayBuffer = await fileData.arrayBuffer();
+        buffer = Buffer.from(arrayBuffer);
+      }
+    } catch (e) {
+      downloadError = e;
     }
 
-    const pdfBuffer = await response.arrayBuffer();
+    if (!buffer) {
+      const response = await fetch(invoice.invoice_pdf_url);
+      if (!response.ok) {
+        console.error('Public URL fetch failed:', response.status, response.statusText, downloadError);
+        return res.status(404).json({ error: 'PDF file not found in storage' });
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
+    }
 
     res.setHeader('Content-Type', 'application/pdf');
     const isDownload = req.query.download === 'true';
     res.setHeader('Content-Disposition', `${isDownload ? 'attachment' : 'inline'}; filename="${invoice.invoice_no}.pdf"`);
-    
-    return res.send(Buffer.from(pdfBuffer));
+    res.setHeader('Content-Length', buffer.length);
+    return res.end(buffer);
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('Invoice PDF API Error:', error);
     return res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 };

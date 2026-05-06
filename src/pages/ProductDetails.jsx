@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package, Tag, Box, Info, Edit2, Trash2, IndianRupee, Cpu, Zap, Layers } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import ProductModal from '../components/ProductModal';
+import { sentenceCase } from '../utils/stringUtils';
 import './ProductDashboard.css';
 
 const ProductDetails = () => {
@@ -80,10 +81,10 @@ const ProductDetails = () => {
         <div className="detail-card">
           <div className="detail-hero product-hero">
             <div className="hero-content">
-              <span className="status-badge info" style={{ marginBottom: '16px' }}>{product?.category}</span>
-              <h1 className="hero-title">{product?.sub_category}</h1>
+              <span className="status-badge info" style={{ marginBottom: '16px' }}>{sentenceCase(product?.category)}</span>
+              <h1 className="hero-title">{sentenceCase(product?.sub_category)}</h1>
               <p className="hero-subtitle" style={{ maxWidth: '800px', marginTop: '8px' }}>
-                {product?.Description || 'High-performance modular component designed for industrial food processing systems.'}
+                {product?.Description ? sentenceCase(product.Description) : 'High-performance modular component designed for industrial food processing systems.'}
               </p>
             </div>
           </div>

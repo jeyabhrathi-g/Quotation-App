@@ -39,13 +39,34 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
 
   const validate = () => {
     const errors = {};
-    if (!formData.name.trim()) errors.name = 'Name is mandatory';
+    const nameValue = formData.name.trim();
+    const emailValue = formData.email.trim();
+    const addressValue = formData.address.trim();
+
+    if (!nameValue) {
+      errors.name = 'Name is mandatory';
+    } else if (nameValue.length > 50) {
+      errors.name = 'Name must be 50 characters or fewer';
+    }
+
+    if (emailValue) {
+      const emailPattern = /^[A-Za-z0-9._%+-]+@gmail\.com$/i;
+      if (!emailPattern.test(emailValue)) {
+        errors.email = 'Email must be a valid Gmail address';
+      }
+    }
+
     if (!formData.phone.trim()) {
       errors.phone = 'Phone number is mandatory';
     } else if (!/^\d{10}$/.test(formData.phone)) {
       errors.phone = 'Phone number must be exactly 10 digits';
     }
-    if (!formData.address.trim()) errors.address = 'Address is mandatory';
+
+    if (!addressValue) {
+      errors.address = 'Address is mandatory';
+    } else if (addressValue.length > 150) {
+      errors.address = 'Address must be 150 characters or fewer';
+    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -53,14 +74,26 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Special handling for phone to only allow digits and max 10
+
     if (name === 'phone') {
       const numericValue = value.replace(/\D/g, '').slice(0, 10);
       setFormData(prev => ({ ...prev, [name]: numericValue }));
+    } else if (name === 'name') {
+      setFormData(prev => ({ ...prev, [name]: value.slice(0, 50) }));
+    } else if (name === 'address') {
+      setFormData(prev => ({ ...prev, [name]: value.slice(0, 150) }));
+    } else if (name === 'email') {
+      let normalizedValue = value;
+      const lowerValue = value.toLowerCase();
+      const gmailIndex = lowerValue.indexOf('@gmail.com');
+      if (gmailIndex !== -1) {
+        normalizedValue = value.slice(0, gmailIndex + '@gmail.com'.length);
+      }
+      setFormData(prev => ({ ...prev, [name]: normalizedValue }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
-    // Clear validation error when user types
+
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -128,12 +161,13 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Full Name"
+                  maxLength={50}
                 />
               </div>
               {validationErrors.name && <span className="error-hint">{validationErrors.name}</span>}
             </div>
 
-            <div className="form-group">
+            <div className={`form-group ${validationErrors.email ? 'has-error' : ''}`}>
               <label>Email ID</label>
               <div className="input-with-icon">
                 <Mail size={18} className="field-icon" />
@@ -145,6 +179,7 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
                   placeholder="email@example.com"
                 />
               </div>
+              {validationErrors.email && <span className="error-hint">{validationErrors.email}</span>}
             </div>
 
             <div className={`form-group ${validationErrors.phone ? 'has-error' : ''}`}>
@@ -187,6 +222,7 @@ const CustomerModal = ({ isOpen, customer, onClose }) => {
                   onChange={handleChange}
                   placeholder="Enter full client address..."
                   rows="3"
+                  maxLength={150}
                 ></textarea>
               </div>
               {validationErrors.address && <span className="error-hint">{validationErrors.address}</span>}
