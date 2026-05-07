@@ -57,12 +57,18 @@
   border-bottom: 2px solid var(--primary-navy);
 }
 
-.col {
+.table-header .col {
   color: var(--text-main);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.col {
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .table-body {
@@ -123,13 +129,20 @@
   font-weight: 600;
   color: var(--text-main);
   font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .phone-bold {
   font-weight: 500;
   color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+.email-text,
 .address-text {
   color: var(--text-muted);
   font-size: 0.85rem;

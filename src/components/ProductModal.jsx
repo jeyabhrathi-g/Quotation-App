@@ -67,7 +67,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
 
   const validate = () => {
     if (!formData.category.trim()) return 'Check Category';
-    if (!formData.sub_category.trim()) return 'Check Sub Category Name';
+    if (!formData.sub_category.trim()) return 'Check Product Name';
     if (!formData.rate || isNaN(formData.rate)) return 'Check Base Rate (Must be a number)';
     if (formData.gst === '' || isNaN(formData.gst)) return 'Check GST % (Must be a number)';
     if (!formData.steel) return 'Check Steel Type';
@@ -161,7 +161,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label>Sub Category / Model <span className="required">*</span></label>
+              <label>Product Name <span className="required">*</span></label>
               <div className="input-with-icon">
                 <ShoppingBag size={18} className="field-icon" />
                 <input

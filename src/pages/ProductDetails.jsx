@@ -89,33 +89,63 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          <div className="details-grid">
-            <div className="spec-card">
-               <div className="spec-card-icon"><Cpu size={20} /></div>
-               <span className="spec-label">Technical Output</span>
-               <p className="spec-value">{product?.rpm || 'Variable'} RPM</p>
-               <p className="info-label">Motor Speed Specification</p>
-            </div>
+          <div className="details-grid product-detail-grid">
+            <div className="info-group">
+              <div className="info-item">
+                <div className="info-icon"><Package size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">Product Name</span>
+                  <span className="info-value">{sentenceCase(product?.sub_category)}</span>
+                </div>
+              </div>
 
-            <div className="spec-card">
-               <div className="spec-card-icon" style={{color: 'var(--danger)'}}><Zap size={20} /></div>
-               <span className="spec-label">Power Input</span>
-               <p className="spec-value">{product?.phase || 'Single'} Phase</p>
-               <p className="info-label">Voltage Requirement</p>
-            </div>
+              <div className="info-item">
+                <div className="info-icon"><Tag size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">Category</span>
+                  <span className="info-value">{sentenceCase(product?.category)}</span>
+                </div>
+              </div>
 
-            <div className="spec-card">
-               <div className="spec-card-icon" style={{color: 'var(--success)'}}><Layers size={20} /></div>
-               <span className="spec-label">Material & Energy</span>
-               <p className="spec-value">{product?.steel} | {product?.energy}</p>
-               <p className="info-label">Construction & Consumption</p>
-            </div>
+              <div className="info-item">
+                <div className="info-icon"><Cpu size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">RPM</span>
+                  <span className="info-value">{product?.rpm || 'Variable'}</span>
+                </div>
+              </div>
 
-            <div className="spec-card" style={{ background: 'var(--primary-light)', borderColor: 'var(--primary-navy)' }}>
-               <div className="spec-card-icon" style={{ background: 'white' }}><IndianRupee size={20} /></div>
-               <span className="spec-label" style={{ color: 'var(--primary-navy)' }}>Catalog Rate</span>
-               <p className="spec-value" style={{ fontSize: '1.5rem' }}>₹{parseFloat(product?.rate || 0).toLocaleString()}</p>
-               <p className="info-label" style={{ color: 'var(--primary-navy)', opacity: 0.8 }}>Standard Unit Price</p>
+              <div className="info-item">
+                <div className="info-icon"><Zap size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">Phase</span>
+                  <span className="info-value">{product?.phase || 'Single'}</span>
+                </div>
+              </div>
+
+              <div className="info-item">
+                <div className="info-icon"><Layers size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">Steel / Energy</span>
+                  <span className="info-value">{product?.steel} | {product?.energy}</span>
+                </div>
+              </div>
+
+              <div className="info-item">
+                <div className="info-icon"><IndianRupee size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">Catalog Rate</span>
+                  <span className="info-value">₹{parseFloat(product?.rate || 0).toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="info-item full-width">
+                <div className="info-icon"><Info size={20} /></div>
+                <div className="info-text">
+                  <span className="info-label">Technical Description</span>
+                  <span className="info-value" style={{ fontWeight: 500, whiteSpace: 'normal' }}>{product?.Description || 'No additional specifications provided.'}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

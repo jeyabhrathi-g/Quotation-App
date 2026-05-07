@@ -236,7 +236,7 @@ const InvoiceDashboard = () => {
                   : new Date(inv.created_at).toLocaleDateString('en-GB')}
               </div>
               <div className="inv-amount" data-label="Amount">₹{Math.round(inv.total || 0).toLocaleString('en-IN')}</div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <div className="inv-actions-cell" data-label="Action">
                 <button
                   className="inv-view-btn"
                   onClick={() => handleViewPDF(inv.id)}

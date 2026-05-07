@@ -41,7 +41,7 @@ const ProductDashboard = () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('category', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setProducts(data || []);
@@ -137,7 +137,7 @@ const ProductDashboard = () => {
         <div className="table-container product-table">
           <div className="table-header product-table-header">
             <div className="col cat-col">CATEGORY</div>
-            <div className="col name-col">SUB CATEGORY</div>
+            <div className="col name-col">PRODUCT NAME</div>
             <div className="col specs-col">SPECS (PHASE/RPM)</div>
             <div className="col steel-col">STEEL / ENERGY</div>
             <div className="col rate-col">RATE (₹)</div>
@@ -155,7 +155,7 @@ const ProductDashboard = () => {
                     <span className="category-tag-badge">{sentenceCase(product.category)}</span>
                   </div>
 
-                  <div className="col name-col" data-label="Sub Category">
+                  <div className="col name-col" data-label="Product Name">
                     <span className="product-name-bold clickable">{sentenceCase(product.sub_category)}</span>
                   </div>
 

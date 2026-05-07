@@ -70,7 +70,8 @@
 
 .inv-table-header {
   display: grid;
-  grid-template-columns: 1.2fr 1.2fr 2fr 1fr 1fr 1.5fr;
+  grid-template-columns: 1.4fr 1.4fr 2.4fr 1.0fr 1.0fr 3.4fr;
+  column-gap: 24px;
   padding: 16px 24px;
   background: var(--primary-light);
   border-bottom: 2px solid var(--primary-navy);
@@ -83,7 +84,8 @@
 
 .inv-table-row {
   display: grid;
-  grid-template-columns: 1.2fr 1.2fr 2fr 1fr 1fr 1.5fr;
+  grid-template-columns: 1.4fr 1.4fr 2.4fr 1.0fr 1.0fr 3.4fr;
+  column-gap: 24px;
   padding: 16px 24px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
@@ -121,18 +123,38 @@
 .inv-customer {
   font-weight: 600;
   color: var(--text-main);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .inv-date {
   color: var(--text-muted);
   font-size: 0.85rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .inv-amount {
   font-weight: 700;
   color: var(--text-main);
   text-align: right;
-  padding-right: 12px;
+  padding-right: 16px;
+  white-space: normal;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.inv-actions-cell {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-left: 20px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.inv-actions-cell button {
+  white-space: nowrap;
 }
 
 .inv-view-btn, .inv-download-btn, .inv-share-btn {

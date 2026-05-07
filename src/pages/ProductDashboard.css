@@ -104,11 +104,36 @@
   font-weight: 600;
   color: var(--text-main);
   font-size: 0.95rem;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .specs-text, .steel-energy-text {
   color: var(--text-muted);
   font-size: 0.85rem;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.product-hero .hero-content,
+.product-detail-grid {
+  width: 100%;
+}
+
+.product-detail-grid .info-item {
+  align-items: flex-start;
+}
+
+.product-detail-grid .info-value {
+  font-weight: 600;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.product-detail-grid .full-width {
+  grid-column: 1 / -1;
 }
 
 .rate-text-green {

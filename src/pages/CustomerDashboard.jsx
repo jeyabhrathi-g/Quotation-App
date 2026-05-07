@@ -5,7 +5,6 @@ import { supabase } from '../supabaseClient';
 import { useSearch } from '../components/Layout';
 import CustomerModal from '../components/CustomerModal';
 import Pagination from '../components/Pagination';
-import { sentenceCase } from '../utils/stringUtils';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const CustomerDashboard = () => {
@@ -123,7 +122,7 @@ const CustomerDashboard = () => {
           <div className="table-header simple-view">
             <div className="col profile">CUSTOMER NAME</div>
             <div className="col contact">PHONE NUMBER</div>
-            <div className="col address">ADDRESS</div>
+            <div className="col address">EMAIL ID</div>
           </div>
 
           {loading ? (
@@ -136,10 +135,10 @@ const CustomerDashboard = () => {
                 <div key={customer.id} className="table-row simple-view" onClick={() => navigate(`/customers/${customer.id}`)} style={{ cursor: 'pointer' }}>
                   <div className="col profile">
                     <div className="avatar">
-                      {sentenceCase(customer.name).charAt(0)}
+                      {customer.name?.charAt(0) || ''}
                     </div>
                     <div className="customer-details-text">
-                      <span className="customer-name-text clickable">{sentenceCase(customer.name)}</span>
+                      <span className="customer-name-text clickable">{customer.name}</span>
                     </div>
                   </div>
 
@@ -147,8 +146,8 @@ const CustomerDashboard = () => {
                     <span className="phone-bold">{customer.phone}</span>
                   </div>
 
-                  <div className="col address" data-label="Address">
-                    <span className="address-text">{sentenceCase(customer.address)}</span>
+                  <div className="col address" data-label="Email ID">
+                    <span className="email-text">{customer.email || 'Not Provided'}</span>
                   </div>
                 </div>
               ))}

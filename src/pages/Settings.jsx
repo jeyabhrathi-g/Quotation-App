@@ -10,7 +10,7 @@ const Settings = () => {
   const [localAppName, setLocalAppName] = useState(appName);
   const [isSavingApp, setIsSavingApp] = useState(false);
 
-  const [userForm, setUserForm] = useState({ username: '', password: '', role: 'User' });
+  const [userForm, setUserForm] = useState({ username: '', password: '', role: 'Admin' });
   const [isAddingUser, setIsAddingUser] = useState(false);
 
   const { setPageTitle } = useSearch();
@@ -76,7 +76,7 @@ const Settings = () => {
       if (insertError) throw insertError;
 
       alert('User added successfully!');
-      setUserForm({ username: '', password: '', role: 'User' }); // reset form
+      setUserForm({ username: '', password: '', role: 'Admin' }); // reset form
 
     } catch (err) {
       console.error('Error adding user:', err);
@@ -203,7 +203,6 @@ const Settings = () => {
                   value={userForm.role}
                   onChange={(e) => setUserForm({...userForm, role: e.target.value})}
                 >
-                  <option value="User">User</option>
                   <option value="Admin">Admin</option>
                 </select>
               </div>
