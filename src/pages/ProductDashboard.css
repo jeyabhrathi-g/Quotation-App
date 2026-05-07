@@ -55,7 +55,8 @@
 
 .product-table .table-header {
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 20px;
   padding: 16px 24px;
   background: var(--primary-light);
   border-bottom: 2px solid var(--primary-navy);
@@ -68,7 +69,8 @@
 
 .product-row {
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 20px;
   padding: 16px 24px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
@@ -91,6 +93,13 @@
   background: var(--input-bg);
 }
 
+.product-table .table-header > .col,
+.product-row > .col {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .category-tag-badge {
   background: var(--primary-light);
   color: var(--primary-navy);
@@ -107,6 +116,8 @@
   line-height: 1.4;
   white-space: normal;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .specs-text, .steel-energy-text {
@@ -115,6 +126,8 @@
   line-height: 1.4;
   white-space: normal;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .product-hero .hero-content,

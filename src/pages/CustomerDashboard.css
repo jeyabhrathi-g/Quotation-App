@@ -50,7 +50,8 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 2fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr);
+  column-gap: 24px;
   padding: 16px 24px;
   background: var(--primary-light);
   /* Lighter, visually appealing color */
@@ -63,12 +64,14 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  min-width: 0;
 }
 
 .col {
   color: var(--text-main);
   font-size: 0.75rem;
   font-weight: 700;
+  min-width: 0;
 }
 
 .table-body {
@@ -78,7 +81,8 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 2fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr);
+  column-gap: 24px;
   padding: 16px 24px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
@@ -129,26 +133,26 @@
   font-weight: 600;
   color: var(--text-main);
   font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .phone-bold {
   font-weight: 500;
   color: var(--text-main);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .email-text,
 .address-text {
   color: var(--text-muted);
   font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .table-status {
