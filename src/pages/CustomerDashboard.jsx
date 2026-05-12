@@ -56,7 +56,7 @@ const CustomerDashboard = () => {
     );
   }, [customers, searchQuery]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / itemsPerPage));    
 
   useEffect(() => {
     if (currentPage > totalPages) {
