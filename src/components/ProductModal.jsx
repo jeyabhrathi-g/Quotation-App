@@ -69,7 +69,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
     if (!formData.category.trim()) return 'Check Category';
     if (!formData.sub_category.trim()) return 'Check Product Name';
     if (!formData.rate || isNaN(formData.rate)) return 'Check Base Rate (Must be a number)';
-    if (formData.gst === '' || isNaN(formData.gst)) return 'Check GST % (Must be a number)';
+    if (formData.gst !== '' && formData.gst !== null && isNaN(formData.gst)) return 'Check GST % (Must be a number)';
     if (!formData.steel) return 'Check Steel Type';
     if (!formData.energy) return 'Check Energy Type';
     return null;
@@ -95,7 +95,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         steel: formData.steel,
         energy: formData.energy,
         rate: parseFloat(formData.rate),
-        gst: parseFloat(formData.gst),
+        gst: formData.gst !== '' && formData.gst !== null ? parseFloat(formData.gst) : null,
         Description: formData.Description.trim()
       };
 
@@ -231,7 +231,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label>GST (%) <span className="required">*</span></label>
+              <label>GST (%)</label>
               <div className="input-with-icon">
                 <Tag size={18} className="field-icon" style={{ transform: 'rotate(90deg)' }} />
                 <input
@@ -240,7 +240,6 @@ const ProductModal = ({ isOpen, product, onClose }) => {
                   placeholder="Enter GST %"
                   value={formData.gst}
                   onChange={(e) => setFormData({ ...formData, gst: e.target.value })}
-                  required
                 />
               </div>
             </div>

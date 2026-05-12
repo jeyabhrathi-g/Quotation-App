@@ -227,6 +227,72 @@
   color: var(--danger);
 }
 
+.logout-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.logout-confirm-card {
+  width: min(480px, 100%);
+  background: var(--card-bg);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.logout-confirm-card h3 {
+  margin: 0 0 12px;
+  color: var(--text-main);
+  font-size: 1.2rem;
+}
+
+.logout-confirm-card p {
+  margin: 0 0 24px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.logout-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.logout-cancel-btn,
+.logout-confirm-btn {
+  min-width: 120px;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout-cancel-btn {
+  background: var(--card-bg);
+  color: var(--text-main);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.logout-confirm-btn {
+  background: var(--danger);
+  color: white;
+}
+
+.logout-cancel-btn:hover,
+.logout-confirm-btn:hover {
+  opacity: 0.95;
+}
+
 .mobile-menu-toggle {
   display: none;
   background: transparent;

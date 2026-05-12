@@ -151,114 +151,114 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
   currY = doc.lastAutoTable.finalY;
 
   // ── ITEMS TABLE ──────────────────────────────────────────────────────────────
-  // Step 1: Calculate totals per product individually, then sum
+  const discountValue = Number(invoiceData.discount || 0);
   let taxableTotal = 0;
   let cgstTotal = 0;
   let sgstTotal = 0;
   let totalQty = 0;
-
-  items.forEach((item) => {
-    const base     = (item.qty  || 0) * (item.rate     || 0);
-    const cgstAmt  = base * ((item.cgst_pct || 0) / 100);  // per-product rate
-    const sgstAmt  = base * ((item.sgst_pct || 0) / 100);  // per-product rate
-    taxableTotal  += base;
-    cgstTotal     += cgstAmt;   // sum all, regardless of different rates
-    sgstTotal     += sgstAmt;
-    totalQty      += (item.qty || 0);
-  });
-
-  const grandTotal = taxableTotal + cgstTotal + sgstTotal - (invoiceData.discount || 0);
-
-  // Step 2: Build product rows — ONE clean row per product, NO per-product GST sub-rows
   const itemRows = [];
 
   items.forEach((item, index) => {
-    const base = (item.qty || 0) * (item.rate || 0);
+    const qty = Number(item.qty || 0);
+    const rate = Number(item.rate || 0);
+    const base = qty * rate;
+    const cgstAmt = base * ((Number(item.cgst_pct) || 0) / 100);
+    const sgstAmt = base * ((Number(item.sgst_pct) || 0) / 100);
+    const rowTotal = base + cgstAmt + sgstAmt;
+    const productName = item.desc || item.product_name || item.name || '';
+
+    taxableTotal += base;
+    cgstTotal += cgstAmt;
+    sgstTotal += sgstAmt;
+    totalQty += qty;
+
     itemRows.push([
-      { content: (index + 1).toString(), styles: { halign: 'center', fontStyle: 'bold' } },
-      { content: item.desc || '', styles: { fontStyle: 'bold' } },
-      { content: item.hsn || '---', styles: { halign: 'center' } },
-      { content: `${item.qty} nos`, styles: { halign: 'center' } },
-      { content: fmt(item.rate, 0), styles: { halign: 'right' } },
-      { content: 'nos', styles: { halign: 'center' } },
-      { content: fmt(base), styles: { halign: 'right' } }
+      { content: String(index + 1), styles: { halign: 'center', fontStyle: 'bold' } },
+      { content: productName, styles: { fontStyle: 'bold' } },
+      { content: qty.toString(), styles: { halign: 'center' } },
+      { content: `₹${fmt(rate, 2)}`, styles: { halign: 'right' } },
+      { content: `${(Number(item.cgst_pct) || 0) + (Number(item.sgst_pct) || 0)}%`, styles: { halign: 'center' } },
+      { content: `₹${fmt(rowTotal)}`, styles: { halign: 'right' } }
     ]);
   });
 
-  // Calculate total GST percentages by summing all item rates
-  const totalCgstPct = items.reduce((sum, item) => sum + (item.cgst_pct || 0), 0);
-  const totalSgstPct = items.reduce((sum, item) => sum + (item.sgst_pct || 0), 0);
-  const cgstLabel = `CGST @ ${totalCgstPct}%`;
-  const sgstLabel = `SGST @ ${totalSgstPct}%`;
-  const cgstRateStr = `${totalCgstPct}%`;
-  const sgstRateStr = `${totalSgstPct}%`;
-
-  // Step 3: Taxable subtotal
-  itemRows.push([
-    '', '', '', '', '', '',
-    { content: fmt(taxableTotal), styles: { halign: 'right', fontSize: 7.5 } }
-  ]);
-
-  // Step 4: CGST combined row (ONE row, sum of all products)
-  itemRows.push([
-    '',
-    { content: cgstLabel, styles: { halign: 'right', fontStyle: 'bold' } },
-    '', '',
-    { content: cgstRateStr, styles: { halign: 'right' } },
-    '',
-    { content: fmt(cgstTotal), styles: { halign: 'right', fontStyle: 'bold' } }
-  ]);
-
-  // Step 5: SGST combined row (ONE row, sum of all products)
-  itemRows.push([
-    '',
-    { content: sgstLabel, styles: { halign: 'right', fontStyle: 'bold' } },
-    '', '',
-    { content: sgstRateStr, styles: { halign: 'right' } },
-    '',
-    { content: fmt(sgstTotal), styles: { halign: 'right', fontStyle: 'bold' } }
-  ]);
-
-  // Spacer
-  itemRows.push(['', '', '', '', '', '', '']);
-
-  // Grand Total row — highlighted background for clarity
-  itemRows.push([
-    { content: '', styles: { fillColor: [245, 245, 245] } },
-    { content: 'Total', styles: { halign: 'center', fontStyle: 'bold', fontSize: 9, fillColor: [245, 245, 245] } },
-    { content: '', styles: { fillColor: [245, 245, 245] } },
-    { content: `${totalQty} nos`, styles: { halign: 'center', fontStyle: 'bold', fillColor: [245, 245, 245] } },
-    { content: '', styles: { fillColor: [245, 245, 245] } },
-    { content: '', styles: { fillColor: [245, 245, 245] } },
-    { content: `Rs. ${fmt(grandTotal)}`, styles: { halign: 'right', fontStyle: 'bold', fontSize: 10, fillColor: [245, 245, 245] } }
-  ]);
+  const grandTotal = taxableTotal + cgstTotal + sgstTotal - discountValue;
 
   autoTable(doc, {
     startY: currY,
     margin: { left: 10, right: 10 },
+    theme: 'grid',
     head: [[
-      { content: 'SI\nNo.', styles: { halign: 'center' } },
-      { content: 'Description of Goods', styles: { halign: 'center' } },
-      { content: 'HSN/SAC', styles: { halign: 'center' } },
-      { content: 'Quantity', styles: { halign: 'center' } },
+      { content: 'SI No.', styles: { halign: 'center' } },
+      { content: 'Product Name', styles: { halign: 'center' } },
+      { content: 'Qty', styles: { halign: 'center' } },
       { content: 'Rate', styles: { halign: 'center' } },
-      { content: 'per', styles: { halign: 'center' } },
+      { content: 'GST', styles: { halign: 'center' } },
       { content: 'Amount', styles: { halign: 'right' } }
     ]],
     body: itemRows,
-    theme: 'grid',
-    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 1.5 },
-    headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold', lineColor: [0, 0, 0], lineWidth: 0.2 },
+    styles: {
+      fontSize: 8,
+      textColor: [17, 24, 39],
+      lineColor: [148, 163, 184],
+      lineWidth: 0.15,
+      cellPadding: 3,
+      minCellHeight: 8,
+    },
+    headStyles: {
+      fillColor: [241, 245, 249],
+      textColor: [17, 24, 39],
+      fontStyle: 'bold',
+      lineColor: [148, 163, 184],
+      lineWidth: 0.3,
+    },
     columnStyles: {
-      0: { cellWidth: 10 },
-      1: { cellWidth: 60 },
+      0: { cellWidth: 14 },
+      1: { cellWidth: 88 },
       2: { cellWidth: 18, halign: 'center' },
-      3: { cellWidth: 22, halign: 'center' },
-      4: { cellWidth: 22, halign: 'right' },
-      5: { cellWidth: 12, halign: 'center' },
-      6: { cellWidth: 'auto', halign: 'right' },
+      3: { cellWidth: 24, halign: 'right' },
+      4: { cellWidth: 18, halign: 'center' },
+      5: { cellWidth: 'auto', halign: 'right' }
     }
   });
+
+  currY = doc.lastAutoTable.finalY + 4;
+
+  autoTable(doc, {
+    startY: currY,
+    margin: { left: 10, right: 10 },
+    theme: 'grid',
+    styles: { fontSize: 8, textColor: [17, 24, 39], lineColor: [148, 163, 184], lineWidth: 0.15, cellPadding: 3 },
+    body: [
+      [
+        { content: 'Subtotal', styles: { halign: 'right', fontStyle: 'bold', cellWidth: 138 } },
+        { content: `₹${fmt(taxableTotal)}`, styles: { halign: 'right' } }
+      ],
+      [
+        { content: 'CGST Total', styles: { halign: 'right', fontStyle: 'bold' } },
+        { content: `₹${fmt(cgstTotal)}`, styles: { halign: 'right' } }
+      ],
+      [
+        { content: 'SGST Total', styles: { halign: 'right', fontStyle: 'bold' } },
+        { content: `₹${fmt(sgstTotal)}`, styles: { halign: 'right' } }
+      ],
+      ...(discountValue ? [[
+        { content: 'Discount', styles: { halign: 'right', fontStyle: 'bold' } },
+        { content: `- ₹${fmt(discountValue)}`, styles: { halign: 'right' } }
+      ]] : []),
+      [
+        { content: 'Grand Total', styles: { halign: 'right', fontStyle: 'bold', cellWidth: 138, fillColor: [241, 245, 249] } },
+        { content: `₹${fmt(grandTotal)}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [241, 245, 249] } }
+      ]
+    ],
+    columnStyles: { 0: { cellWidth: 138 }, 1: { cellWidth: 40, halign: 'right' } }
+  });
+
+  currY = doc.lastAutoTable.finalY;
+
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.text('E. & O.E', pageW - 10, doc.lastAutoTable.finalY - 2, { align: 'right' });
 
   currY = doc.lastAutoTable.finalY;
 

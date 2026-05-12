@@ -15,7 +15,7 @@ import { useAppContext } from '../context/AppContext';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import './Sidebar.css';
 
-const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen, setIsMobileSidebarOpen }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen, setIsMobileSidebarOpen, requestLogout }) => {
   const { role, logout } = useAuth();
   const { appName } = useAppContext();
   const location = useLocation();
@@ -93,7 +93,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen, s
           <span className="nav-icon"><Settings size={22} /></span>
           {!isCollapsed && <span className="nav-label">Settings</span>}
         </Link>
-        <button className="nav-link logout-nav" onClick={logout}>
+        <button className="nav-link logout-nav" onClick={requestLogout || logout}>
           <span className="nav-icon"><LogOut size={22} /></span>
           {!isCollapsed && <span className="nav-label">Logout</span>}
         </button>

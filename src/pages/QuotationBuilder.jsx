@@ -40,6 +40,15 @@ const QuotationBuilder = () => {
   
   const [loading, setLoading] = useState(false);
 
+  const [formErrors, setFormErrors] = useState({});
+  const [itemErrors, setItemErrors] = useState({});
+
+  const getProductName = (item) => {
+    const product = products.find(p => p.id === item.product_id);
+    const name = product?.sub_category || product?.product_name || product?.name || item.desc || item.name || '';
+    return sentenceCase(name);
+  };
+
   useEffect(() => {
     fetchDependencies();
     if (id) {
@@ -71,7 +80,7 @@ const QuotationBuilder = () => {
         if (parsedItems.length > 0) {
           const firstItem = parsedItems[0];
           setDraftProduct(firstItem.product_id || '');
-          setDraftDesc(firstItem.desc || '');
+          setDraftDesc(getProductName(firstItem));
           setDraftQty(firstItem.qty || 1);
           setDraftRate(firstItem.rate || '');
           setDraftCgst(firstItem.cgst_pct || 9);
@@ -111,11 +120,7 @@ const QuotationBuilder = () => {
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    if (!draftCategory) return products;
-    const cat = categories.find(c => c.id.toString() === draftCategory);
-    return products.filter(p => p.category?.trim() === cat?.category_name?.trim());
-  }, [products, categories, draftCategory]);
+
 
   const handleProductSelect = (e) => {
     const pId = e.target.value;
@@ -127,17 +132,25 @@ const QuotationBuilder = () => {
       const productGst = Number(prod.gst ?? prod.GST ?? 0) || 0;
       const gstHalf = productGst / 2;
       setDraftRate(prod.rate || 0);
-      setDraftDesc(`${prod.sub_category || ''} - ${prod.Description || ''}`);
+      setDraftDesc(prod.sub_category || prod.product_name || prod.name || '');
       setDraftCgst(gstHalf);
       setDraftSgst(gstHalf);
     }
   };
 
   const addItem = () => {
-    if (!customerId || !draftCategory || !draftProduct || !draftQty || !draftRate) {
-      alert("Please fill all mandatory fields");
+    const errors = {};
+    if (!draftProduct) errors.product = "Product Name is required";
+    if (!draftQty) errors.qty = "Qty is required";
+    if (draftRate === '' || draftRate === null) errors.rate = "Rate is required";
+    if (draftCgst === '' || draftCgst === null) errors.cgst = "CGST is required";
+    if (draftSgst === '' || draftSgst === null) errors.sgst = "SGST is required";
+
+    if (Object.keys(errors).length > 0) {
+      setItemErrors(errors);
       return;
     }
+    setItemErrors({});
 
     const itemPayload = {
       id: editingItemId || Date.now().toString(),
@@ -169,7 +182,7 @@ const QuotationBuilder = () => {
   const startEditItem = (item) => {
     setEditingItemId(item.id);
     setDraftProduct(item.product_id || '');
-    setDraftDesc(item.desc || '');
+    setDraftDesc(getProductName(item));
     setDraftQty(item.qty || 1);
     setDraftRate(item.rate || '');
     setDraftCgst(item.cgst_pct ?? 9);
@@ -236,7 +249,17 @@ const QuotationBuilder = () => {
   };
 
   const saveQuotation = async (status, shouldGeneratePdf = false) => {
-    if (!customerId) return alert("Please select a customer.");
+    const errors = {};
+    if (!quoteDate) errors.quoteDate = "Quote Date is required";
+    if (!expiryDate) errors.expiryDate = "Expiry Date is required";
+    if (!customerId) errors.customer = "Customer is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return alert("Please fill all mandatory fields.");
+    }
+    setFormErrors({});
+
     if (items.length === 0) return alert("Please add at least one item.");
 
     setLoading(true);
@@ -382,7 +405,7 @@ const QuotationBuilder = () => {
 
       tableRows.push([
         (index + 1).toString(),
-        item.desc || '',
+        getProductName(item),
         item.qty.toString(),
         item.rate.toFixed(0),
         combinedTax.toString(),
@@ -549,65 +572,65 @@ const QuotationBuilder = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Quote Date</label>
-              <input type="date" className="form-input" value={quoteDate} onChange={(e) => setQuoteDate(e.target.value)} />
+              <label className="form-label">Quote Date <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="date" className={`form-input ${formErrors.quoteDate ? 'error-border' : ''}`} value={quoteDate} onChange={(e) => { setQuoteDate(e.target.value); setFormErrors({ ...formErrors, quoteDate: null }); }} />
+              {formErrors.quoteDate && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{formErrors.quoteDate}</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">Expiry Date</label>
-              <input type="date" className="form-input" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+              <label className="form-label">Expiry Date <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="date" className={`form-input ${formErrors.expiryDate ? 'error-border' : ''}`} value={expiryDate} onChange={(e) => { setExpiryDate(e.target.value); setFormErrors({ ...formErrors, expiryDate: null }); }} />
+              {formErrors.expiryDate && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{formErrors.expiryDate}</span>}
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Select Customer</label>
-            <select className="form-select" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
+            <label className="form-label">Select Customer <span style={{ color: 'var(--danger)' }}>*</span></label>
+            <select className={`form-select ${formErrors.customer ? 'error-border' : ''}`} value={customerId} onChange={(e) => { setCustomerId(e.target.value); setFormErrors({ ...formErrors, customer: null }); }}>
               <option value="">-- Select Customer --</option>
               {customers.map(c => <option key={c.id} value={c.id}>{sentenceCase(c.name)}</option>)}
             </select>
+            {formErrors.customer && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{formErrors.customer}</span>}
           </div>
 
           <div className="item-add-box">
             <div className="form-label" style={{ color: 'var(--text-muted)', fontSize: '0.75rem', letterSpacing: '0.05em' }}>ADD ITEM TO LIST</div>
 
             <div className="form-group">
-              <label className="form-label">Category</label>
-              <select className="form-select" value={draftCategory} onChange={(e) => setDraftCategory(e.target.value)}>
-                <option value="">- Category -</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{sentenceCase(c.category_name)}</option>)}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Product / Description</label>
-              <select className="form-select" value={draftProduct} onChange={handleProductSelect}>
-                <option value="">- Sub Category -</option>
-                {filteredProducts.map(p => (
+              <label className="form-label">Product Name <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <select className={`form-select ${itemErrors.product ? 'error-border' : ''}`} value={draftProduct} onChange={(e) => { handleProductSelect(e); setItemErrors({ ...itemErrors, product: null }); }}>
+                <option value="">- Select Product -</option>
+                {products.map(p => (
                   <option key={p.id} value={p.id}>
-                    {sentenceCase(p.sub_category)} - {sentenceCase(p.Description)}
+                    {sentenceCase(p.sub_category || p.product_name || p.name)}
                   </option>
                 ))}
               </select>
+              {itemErrors.product && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{itemErrors.product}</span>}
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Qty</label>
-                <input type="number" className="form-input" value={draftQty} onChange={(e) => setDraftQty(e.target.value)} min="1" />
+                <label className="form-label">Qty <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="number" className={`form-input ${itemErrors.qty ? 'error-border' : ''}`} value={draftQty} onChange={(e) => { setDraftQty(e.target.value); setItemErrors({ ...itemErrors, qty: null }); }} min="1" />
+                {itemErrors.qty && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{itemErrors.qty}</span>}
               </div>
               <div className="form-group">
-                <label className="form-label">Rate (₹)</label>
-                <input type="number" className="form-input" value={draftRate} onChange={(e) => setDraftRate(e.target.value)} />
+                <label className="form-label">Rate (₹) <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="number" className={`form-input ${itemErrors.rate ? 'error-border' : ''}`} value={draftRate} onChange={(e) => { setDraftRate(e.target.value); setItemErrors({ ...itemErrors, rate: null }); }} />
+                {itemErrors.rate && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{itemErrors.rate}</span>}
               </div>
             </div>
             
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">CGST (%)</label>
-                <input type="number" className="form-input" value={draftCgst} onChange={(e) => setDraftCgst(e.target.value)} />
+                <label className="form-label">CGST (%) <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="number" className={`form-input ${itemErrors.cgst ? 'error-border' : ''}`} value={draftCgst} onChange={(e) => { setDraftCgst(e.target.value); setItemErrors({ ...itemErrors, cgst: null }); }} />
+                {itemErrors.cgst && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{itemErrors.cgst}</span>}
               </div>
               <div className="form-group">
-                <label className="form-label">SGST (%)</label>
-                <input type="number" className="form-input" value={draftSgst} onChange={(e) => setDraftSgst(e.target.value)} />
+                <label className="form-label">SGST (%) <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="number" className={`form-input ${itemErrors.sgst ? 'error-border' : ''}`} value={draftSgst} onChange={(e) => { setDraftSgst(e.target.value); setItemErrors({ ...itemErrors, sgst: null }); }} />
+                {itemErrors.sgst && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{itemErrors.sgst}</span>}
               </div>
             </div>
 
@@ -642,7 +665,7 @@ const QuotationBuilder = () => {
 
             <div className="items-header">
               <div>#</div>
-              <div>Description</div>
+              <div>Product Name</div>
               <div style={{ textAlign: 'center' }}>Qty</div>
               <div style={{ textAlign: 'right' }}>Rate & Tax</div>
               <div style={{ textAlign: 'center' }}>Actions</div>
@@ -655,7 +678,7 @@ const QuotationBuilder = () => {
                 items.map((item, idx) => (
                   <div key={item.id} className="item-row">
                     <div style={{ fontWeight: 700, color: 'var(--text-muted)' }}>{idx + 1}</div>
-                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{sentenceCase(item.desc)}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{getProductName(item)}</div>
                     <div style={{ textAlign: 'center', fontWeight: 600 }}>{item.qty}</div>
                     <div style={{ textAlign: 'right', fontSize: '0.85rem' }}>
                       <div style={{ fontWeight: 600 }}>₹{item.rate.toLocaleString()}</div>

@@ -130,7 +130,7 @@
 
 .quote-table .table-header {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 1.2fr);
   column-gap: 20px;
   padding: 16px 24px;
   background: var(--primary-light);
@@ -144,7 +144,7 @@
 
 .quote-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr) minmax(180px, 1.2fr);
   column-gap: 20px;
   padding: 16px 24px;
   align-items: center;
@@ -160,12 +160,16 @@
   background: var(--card-bg);
 }
 
-.quote-row:nth-child(odd) {
+..quote-row:nth-child(odd) {
   background: var(--card-alt);
 }
 
 .quote-row:hover {
   background: var(--input-bg);
+}
+
+.quote-row > div[data-label="Action"] {
+  min-width: 180px;
 }
 
 .quote-table .table-header > .col,
@@ -222,6 +226,11 @@
 .quote-view-btn:hover, .quote-download-btn:hover {
   background: var(--primary-navy);
   color: white;
+}
+
+.quote-view-btn, .quote-download-btn {
+  min-width: 0;
+  white-space: nowrap;
 }
 
 @media (max-width: 1024px) {

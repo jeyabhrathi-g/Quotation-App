@@ -70,26 +70,26 @@
 
 .inv-table-header {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 2.4fr) minmax(0, 1.0fr) minmax(0, 1.0fr) minmax(0, 3.4fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 2.4fr) minmax(0, 1.0fr) minmax(0, 1.0fr) minmax(180px, 3.4fr);
   column-gap: 24px;
-  padding: 16px 24px;
-  background: var(--primary-light);
-  border-bottom: 2px solid var(--primary-navy);
+  padding: 18px 24px;
+  background: rgba(14, 165, 233, 0.08);
+  border-bottom: 2px solid rgba(30, 64, 175, 0.18);
   align-items: center;
   color: var(--text-main);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   text-transform: uppercase;
 }
 
 .inv-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 2.4fr) minmax(0, 1.0fr) minmax(0, 1.0fr) minmax(0, 3.4fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr) minmax(0, 2.4fr) minmax(0, 1.0fr) minmax(0, 1.0fr) minmax(180px, 3.4fr);
   column-gap: 24px;
-  padding: 16px 24px;
+  padding: 18px 24px;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  transition: all 0.2s;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .inv-table-row:last-child {
@@ -153,15 +153,16 @@
 
 .inv-actions-cell {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
-  padding-left: 20px;
-  min-width: 0;
-  flex-wrap: wrap;
+  min-width: 180px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .inv-actions-cell button {
   white-space: nowrap;
+  min-width: 0;
 }
 
 .inv-view-btn, .inv-download-btn, .inv-share-btn {
@@ -208,7 +209,8 @@
     padding: 20px;
   }
 
-  .inv-table-row > div:not(.inv-inv-no):not(.inv-view-btn)::before {
+  .inv-table-row > div:not(.inv-inv-no):not(.inv-actions-cell)::before,
+  .inv-table-row > .inv-actions-cell::before {
     content: attr(data-label);
     display: block;
     font-size: 0.7rem;
@@ -216,5 +218,12 @@
     font-weight: 700;
     text-transform: uppercase;
     margin-bottom: 4px;
+  }
+
+  .inv-table-row > .inv-actions-cell {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }

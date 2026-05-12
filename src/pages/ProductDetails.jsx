@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Tag, Box, Info, Edit2, Trash2, IndianRupee, Cpu, Zap, Layers } from 'lucide-react';
+import { ArrowLeft, Package, Tag, Box, Info, Edit2, Trash2, IndianRupee, Cpu, Zap, Layers, Percent } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import ProductModal from '../components/ProductModal';
 import { sentenceCase } from '../utils/stringUtils';
@@ -79,72 +79,72 @@ const ProductDetails = () => {
 
       <div className="main-scroll-area">
         <div className="detail-card">
-          <div className="detail-hero product-hero">
-            <div className="hero-content">
-              <span className="status-badge info" style={{ marginBottom: '16px' }}>{sentenceCase(product?.category)}</span>
-              <h1 className="hero-title">{sentenceCase(product?.sub_category)}</h1>
-              <p className="hero-subtitle" style={{ maxWidth: '800px', marginTop: '8px' }}>
-                {product?.Description ? sentenceCase(product.Description) : 'High-performance modular component designed for industrial food processing systems.'}
-              </p>
+          <div className="details-grid product-detail-grid" style={{ gap: '32px' }}>
+            <div className="info-item">
+              <div className="info-icon"><Package size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Product Name</span>
+                <span className="info-value">{sentenceCase(product?.sub_category)}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="details-grid product-detail-grid">
-            <div className="info-group">
-              <div className="info-item">
-                <div className="info-icon"><Package size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">Product Name</span>
-                  <span className="info-value">{sentenceCase(product?.sub_category)}</span>
-                </div>
+            <div className="info-item">
+              <div className="info-icon"><Tag size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Category</span>
+                <span className="info-value">{sentenceCase(product?.category)}</span>
               </div>
+            </div>
 
-              <div className="info-item">
-                <div className="info-icon"><Tag size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">Category</span>
-                  <span className="info-value">{sentenceCase(product?.category)}</span>
-                </div>
+            <div className="info-item">
+              <div className="info-icon"><Cpu size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">RPM</span>
+                <span className="info-value">{product?.rpm || 'Variable'}</span>
               </div>
+            </div>
 
-              <div className="info-item">
-                <div className="info-icon"><Cpu size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">RPM</span>
-                  <span className="info-value">{product?.rpm || 'Variable'}</span>
-                </div>
+            <div className="info-item">
+              <div className="info-icon"><Zap size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Phase</span>
+                <span className="info-value">{product?.phase || 'Single'}</span>
               </div>
+            </div>
 
-              <div className="info-item">
-                <div className="info-icon"><Zap size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">Phase</span>
-                  <span className="info-value">{product?.phase || 'Single'}</span>
-                </div>
+            <div className="info-item">
+              <div className="info-icon"><Layers size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Steel / Energy</span>
+                <span className="info-value">{product?.steel} | {product?.energy}</span>
               </div>
+            </div>
 
-              <div className="info-item">
-                <div className="info-icon"><Layers size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">Steel / Energy</span>
-                  <span className="info-value">{product?.steel} | {product?.energy}</span>
-                </div>
+            <div className="info-item">
+              <div className="info-icon"><IndianRupee size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Catalog Rate</span>
+                <span className="info-value">₹{parseFloat(product?.rate || 0).toLocaleString()}</span>
               </div>
+            </div>
 
-              <div className="info-item">
-                <div className="info-icon"><IndianRupee size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">Catalog Rate</span>
-                  <span className="info-value">₹{parseFloat(product?.rate || 0).toLocaleString()}</span>
-                </div>
+            <div className="info-item">
+              <div className="info-icon"><Percent size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">GST</span>
+                <span className="info-value">
+                  {(product?.gst ?? product?.GST) != null && (product?.gst ?? product?.GST) !== '' 
+                    ? `${product.gst ?? product.GST}% GST` 
+                    : 'N/A'}
+                </span>
               </div>
+            </div>
 
-              <div className="info-item full-width">
-                <div className="info-icon"><Info size={20} /></div>
-                <div className="info-text">
-                  <span className="info-label">Technical Description</span>
-                  <span className="info-value" style={{ fontWeight: 500, whiteSpace: 'normal' }}>{product?.Description || 'No additional specifications provided.'}</span>
-                </div>
+            <div className="info-item full-width">
+              <div className="info-icon"><Info size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Technical Description</span>
+                <span className="info-value" style={{ fontWeight: 500, whiteSpace: 'normal' }}>{product?.Description || 'No additional specifications provided.'}</span>
               </div>
             </div>
           </div>

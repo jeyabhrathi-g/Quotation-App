@@ -70,6 +70,9 @@ export const AuthProvider = ({ children }) => {
     setRole(null);
     localStorage.removeItem('ssv_user');
     localStorage.removeItem('isAuth');
+    localStorage.removeItem('ssv_token');
+    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('supabase.auth.refresh-token');
   };
 
   return (
