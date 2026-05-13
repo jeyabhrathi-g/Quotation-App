@@ -17,7 +17,8 @@
   background: var(--card-bg);
   width: 100%;
   max-width: 680px;
-  max-height: 90vh; /* Don't overflow screen */
+  max-height: 90vh;
+  /* Don't overflow screen */
   border-radius: 28px;
   box-shadow: var(--shadow-lg), 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -30,6 +31,7 @@
     opacity: 0;
     transform: translateY(30px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -43,7 +45,8 @@
   justify-content: space-between;
   align-items: flex-start;
   background: var(--card-bg);
-  flex-shrink: 0; /* Keep header from shrinking */
+  flex-shrink: 0;
+  /* Keep header from shrinking */
   border-radius: 28px 28px 0 0;
 }
 
@@ -85,7 +88,8 @@
 .modal-form {
   padding: 40px;
   overflow-y: auto;
-  flex: 1; /* Take up remaining space */
+  flex: 1;
+  /* Take up remaining space */
 }
 
 .form-grid {
@@ -140,7 +144,8 @@
   font-size: 0.95rem;
   font-weight: 500;
   outline: none;
-  min-height: 48px; /* Force minimum height */
+  min-height: 48px;
+  /* Force minimum height */
   transition: all 0.2s;
   font-family: inherit;
   color: var(--text-main);
@@ -162,9 +167,9 @@
   box-shadow: 0 0 0 4px rgba(26, 62, 138, 0.08);
 }
 
-.input-with-icon input:focus + .field-icon,
-.input-with-icon textarea:focus + .field-icon,
-.input-with-icon select:focus + .field-icon {
+.input-with-icon input:focus+.field-icon,
+.input-with-icon textarea:focus+.field-icon,
+.input-with-icon select:focus+.field-icon {
   color: var(--primary-navy);
 }
 
@@ -244,37 +249,71 @@
 }
 
 @media (max-width: 900px) {
+
   /* Start stacking columns slightly earlier for better tablet experience */
-  .form-grid { grid-template-columns: 1fr; gap: 20px; }
-  .form-group.full-width { grid-column: span 1; }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .form-group.full-width {
+    grid-column: span 1;
+  }
 }
 
 @media (max-width: 768px) {
   .modal-overlay {
     padding: 16px;
-    align-items: flex-end; /* Push to bottom on mobile often feels better, or keep center */
+    align-items: flex-end;
+    /* Push to bottom on mobile often feels better, or keep center */
   }
 
   .modal-content {
     border-radius: 20px 20px 20px 20px;
-    max-height: 85vh; /* Safe area for keyboards */
+    max-height: 85vh;
+    /* Safe area for keyboards */
   }
 
-  .modal-header { padding: 20px; border-radius: 20px 20px 0 0; }
-  .modal-form { padding: 20px; }
-  .form-grid { grid-template-columns: 1fr; gap: 16px; }
-  .form-group.full-width { grid-column: span 1; }
-  
+  .modal-header {
+    padding: 20px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .modal-form {
+    padding: 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+
   .input-with-icon input,
   .input-with-icon textarea,
   .input-with-icon select {
     min-height: 48px;
-    font-size: 1rem; /* Better visibility on mobile, no zoom on iOS */
+    font-size: 1rem;
+    /* Better visibility on mobile, no zoom on iOS */
     padding: 12px 12px 12px 42px;
   }
-  
-  .field-icon { left: 14px; }
 
-  .modal-footer { flex-direction: column-reverse; margin-top: 24px; }
-  .cancel-modal-btn, .submit-modal-btn { padding: 14px; width: 100%; justify-content: center; }
+  .field-icon {
+    left: 14px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    margin-top: 24px;
+  }
+
+  .cancel-modal-btn,
+  .submit-modal-btn {
+    padding: 14px;
+    width: 100%;
+    justify-content: center;
+  }
 }

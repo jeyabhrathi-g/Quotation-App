@@ -83,7 +83,8 @@
   background: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
   font-weight: 700;
-  box-shadow: inset 4px 0 0 0 white; /* Prominent white indicator */
+  box-shadow: inset 4px 0 0 0 white;
+  /* Prominent white indicator */
 }
 
 .nav-icon {
@@ -111,7 +112,8 @@
   width: 100%;
   border: none;
   justify-content: flex-start;
-  color: #ef4444; /* Slightly darker, more professional red */
+  color: #ef4444;
+  /* Slightly darker, more professional red */
 }
 
 .logout-nav:hover {

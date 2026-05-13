@@ -1,12 +1,23 @@
-import React, { useState } from 'react';
-import { X, Tag } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Tag, Info } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import './CustomerModal.css'; // Reuse form patterns
 
-const CategoryModal = ({ isOpen, onClose, onCategoryAdded }) => {
+const CategoryModal = ({ isOpen, category, onClose, onCategoryUpdated }) => {
   const [categoryName, setCategoryName] = useState('');
+  const [status, setStatus] = useState('Active');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (category) {
+      setCategoryName(category.category_name || '');
+      setStatus(category.status || 'Active');
+    } else {
+      setCategoryName('');
+      setStatus('Active');
+    }
+  }, [category, isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,16 +30,33 @@ const CategoryModal = ({ isOpen, onClose, onCategoryAdded }) => {
     setError('');
 
     try {
-      const { data, error } = await supabase
-        .from('category')
-        .insert([{ category_name: categoryName.trim() }])
-        .select();
+      const payload = { 
+        category_name: categoryName.trim(),
+        status: status 
+      };
 
-      if (error) throw error;
+      let result;
+      if (category) {
+        // Update existing
+        result = await supabase
+          .from('category')
+          .update(payload)
+          .eq('id', category.id)
+          .select();
+      } else {
+        // Create new
+        result = await supabase
+          .from('category')
+          .insert([payload])
+          .select();
+      }
+
+      if (result.error) throw result.error;
       
-      onCategoryAdded(data[0]);
+      onCategoryUpdated(result.data[0]);
       onClose();
       setCategoryName('');
+      setStatus('Active');
     } catch (error) {
       setError(error.message);
     } finally {
@@ -43,8 +71,8 @@ const CategoryModal = ({ isOpen, onClose, onCategoryAdded }) => {
       <div className="modal-content" style={{ maxWidth: '480px' }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <div className="header-title">
-            <h2>Add New Category</h2>
-            <p>Create a group for your products</p>
+            <h2>{category ? 'Edit Category' : 'Add New Category'}</h2>
+            <p>{category ? 'Update category details' : 'Create a group for your products'}</p>
           </div>
           <button className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
@@ -52,7 +80,7 @@ const CategoryModal = ({ isOpen, onClose, onCategoryAdded }) => {
         <form onSubmit={handleSubmit} className="modal-form">
           {error && (
             <div className="top-error-message">
-              <Tag size={18} />
+              <Info size={18} />
               <span>{error}</span>
             </div>
           )}
@@ -71,10 +99,25 @@ const CategoryModal = ({ isOpen, onClose, onCategoryAdded }) => {
             </div>
           </div>
 
+          <div className="form-group full-width">
+            <label>Status <span className="required">*</span></label>
+            <div className="input-with-icon">
+              <Info size={18} className="field-icon" />
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                required
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
           <div className="modal-footer">
             <button type="button" className="cancel-modal-btn" onClick={onClose}>Cancel</button>
             <button type="submit" className="submit-modal-btn" disabled={loading}>
-              {loading ? 'Adding...' : 'Create Category'}
+              {loading ? 'Saving...' : category ? 'Update Category' : 'Create Category'}
             </button>
           </div>
         </form>

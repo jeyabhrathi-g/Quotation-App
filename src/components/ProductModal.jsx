@@ -14,7 +14,8 @@ const ProductModal = ({ isOpen, product, onClose }) => {
     energy: 'Gas',
     rate: '',
     gst: '',
-    Description: ''
+    Description: '',
+    status: 'Active'
   });
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,8 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         energy: product.energy || 'Gas',
         rate: product.rate || '',
         gst: product.gst ?? product.GST ?? '',
-        Description: product.Description || ''
+        Description: product.Description || '',
+        status: product.status || 'Active'
       });
     } else {
       setFormData({
@@ -47,7 +49,8 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         energy: 'Gas',
         rate: '',
         gst: '',
-        Description: ''
+        Description: '',
+        status: 'Active'
       });
     }
   }, [product, isOpen]);
@@ -72,6 +75,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
     if (formData.gst !== '' && formData.gst !== null && isNaN(formData.gst)) return 'Check GST % (Must be a number)';
     if (!formData.steel) return 'Check Steel Type';
     if (!formData.energy) return 'Check Energy Type';
+    if (!formData.status) return 'Check Product Status';
     return null;
   };
 
@@ -96,7 +100,8 @@ const ProductModal = ({ isOpen, product, onClose }) => {
         energy: formData.energy,
         rate: parseFloat(formData.rate),
         gst: formData.gst !== '' && formData.gst !== null ? parseFloat(formData.gst) : null,
-        Description: formData.Description.trim()
+        Description: formData.Description.trim(),
+        status: formData.status
       };
 
       if (product) {
@@ -156,6 +161,21 @@ const ProductModal = ({ isOpen, product, onClose }) => {
                       {sentenceCase(cat.category_name)}
                     </option>
                   ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Product Status <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <Info size={18} className="field-icon" />
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  required
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
                 </select>
               </div>
             </div>
@@ -257,6 +277,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
                 />
               </div>
             </div>
+
 
             <div className="form-group full-width">
               <label>Technical Description</label>

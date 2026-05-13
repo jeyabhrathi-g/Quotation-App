@@ -13,7 +13,8 @@
   --primary-navy: #1A3E8A;
   --primary-hover: #132e6b;
   --primary-light: #E1EFFF;
-  --sidebar-bg: #1A3E8A; /* Navy for light mode */
+  --sidebar-bg: #1A3E8A;
+  /* Navy for light mode */
   --secondary: #64748b;
   --bg-light: #F9FAFB;
   --card-bg: #ffffff;
@@ -47,15 +48,20 @@
 }
 
 html.dark-theme {
-  --bg-light: #1a1c24; /* Softer dark background for better readability */
-  --card-bg: #242731;  /* Slightly lighter card background */
-  --card-alt: #1e2129; /* Alternate row background */
+  --bg-light: #1a1c24;
+  /* Softer dark background for better readability */
+  --card-bg: #242731;
+  /* Slightly lighter card background */
+  --card-alt: #1e2129;
+  /* Alternate row background */
   --text-main: #fcfcfc;
   --text-muted: #9ea3b0;
   --input-bg: #2d303a;
   --border-color: #2d303a;
-  --primary-navy: #3b82f6; /* Vibrant highlighted blue for buttons/links */
-  --sidebar-bg: #0f172a;  /* Deep navy for better contrast in dark mode */
+  --primary-navy: #3b82f6;
+  /* Vibrant highlighted blue for buttons/links */
+  --sidebar-bg: #0f172a;
+  /* Deep navy for better contrast in dark mode */
   --primary-hover: #2563eb;
   --primary-light: rgba(59, 130, 246, 0.1);
   --success: #10b981;

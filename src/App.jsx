@@ -8,6 +8,7 @@ import CustomerDashboard from './pages/CustomerDashboard';
 import CustomerDetails from './pages/CustomerDetails';
 import ProductDashboard from './pages/ProductDashboard';
 import ProductDetails from './pages/ProductDetails';
+import CategoryDashboard from './pages/CategoryDashboard';
 import QuotationDashboard from './pages/QuotationDashboard';
 import QuotationBuilder from './pages/QuotationBuilder';
 import InvoiceDashboard from './pages/InvoiceDashboard';
@@ -48,6 +49,7 @@ function AppRoutes() {
       } />
 
       {/* Full routes for Admin modules */}
+      <Route path="/categories" element={<ProtectedRoute allowedRole="admin"><Layout><CategoryDashboard /></Layout></ProtectedRoute>} />
       <Route path="/products" element={<ProtectedRoute allowedRole="admin"><Layout><ProductDashboard /></Layout></ProtectedRoute>} />
       <Route path="/products/:id" element={<ProtectedRoute allowedRole="admin"><Layout><ProductDetails /></Layout></ProtectedRoute>} />
       <Route path="/quotations" element={<ProtectedRoute allowedRole="admin"><Layout><QuotationDashboard /></Layout></ProtectedRoute>} />

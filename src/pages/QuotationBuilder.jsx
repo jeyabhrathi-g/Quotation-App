@@ -35,9 +35,9 @@ const QuotationBuilder = () => {
   const [draftDesc, setDraftDesc] = useState('');
   const [draftQty, setDraftQty] = useState(1);
   const [draftRate, setDraftRate] = useState('');
-  const [draftCgst, setDraftCgst] = useState(9);
-  const [draftSgst, setDraftSgst] = useState(9);
-  
+  const [draftCgst, setDraftCgst] = useState('');
+  const [draftSgst, setDraftSgst] = useState('');
+
   const [loading, setLoading] = useState(false);
 
   const [formErrors, setFormErrors] = useState({});
@@ -57,7 +57,7 @@ const QuotationBuilder = () => {
       // Set default dates for new quotation
       const today = new Date();
       setQuoteDate(today.toISOString().split('T')[0]);
-      
+
       const expiry = new Date(today);
       expiry.setDate(today.getDate() + 15);
       setExpiryDate(expiry.toISOString().split('T')[0]);
@@ -75,7 +75,7 @@ const QuotationBuilder = () => {
         setOverallDiscount(data.discount || 0);
         const parsedItems = typeof data.items === 'string' ? JSON.parse(data.items) : (data.items || []);
         setItems(parsedItems);
-        
+
         // Auto-fill left side builder controls with first item
         if (parsedItems.length > 0) {
           const firstItem = parsedItems[0];
@@ -125,11 +125,21 @@ const QuotationBuilder = () => {
   const handleProductSelect = (e) => {
     const pId = e.target.value;
     setDraftProduct(pId);
-    if (!pId) return;
+    
+    if (!pId) {
+      setDraftCgst('');
+      setDraftSgst('');
+      setDraftRate('');
+      setDraftDesc('');
+      return;
+    }
 
     const prod = products.find(p => p.id === pId);
     if (prod) {
-      const productGst = Number(prod.gst ?? prod.GST ?? 0) || 0;
+      // Logic: If product has GST -> split it. If GST is missing/empty -> default to 9 + 9.
+      const rawGst = prod.gst ?? prod.GST;
+      const productGst = (rawGst !== null && rawGst !== undefined && rawGst !== '') ? Number(rawGst) : 18; 
+      
       const gstHalf = productGst / 2;
       setDraftRate(prod.rate || 0);
       setDraftDesc(prod.sub_category || prod.product_name || prod.name || '');
@@ -175,8 +185,8 @@ const QuotationBuilder = () => {
     setDraftDesc('');
     setDraftQty(1);
     setDraftRate('');
-    setDraftCgst(9);
-    setDraftSgst(9);
+    setDraftCgst('');
+    setDraftSgst('');
   };
 
   const startEditItem = (item) => {
@@ -329,14 +339,30 @@ const QuotationBuilder = () => {
 
   const generateAndUploadPDF = async (quoteData) => {
     const doc = new jsPDF();
-    
+
     // Header
+    // 1. Fetch Company Settings (Dynamic vs Fallback)
+    let sellerName = appName;
+    let sellerAddress = "1/145A,Sarogini Nagar,Kalaikoil Nagar,Krishnapuram,Tirunelveli-627011";
+    let sellerGSTIN = "33SSVXP5865Q1ZJ";
+
+    try {
+      const { data: settings } = await supabase.from('company_settings').select('*').limit(1).maybeSingle();
+      if (settings) {
+        if (settings.company_name) sellerName = settings.company_name;
+        if (settings.address)      sellerAddress = settings.address;
+        if (settings.gstin)        sellerGSTIN = settings.gstin;
+      }
+    } catch (err) {
+      console.error('Error fetching company settings for PDF:', err);
+    }
+
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(appName, 105, 15, { align: 'center' });
+    doc.text(sellerName, 105, 15, { align: 'center' });
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('1/145A,Sarogini Nagar,Kalaikoil Nagar,Krishnapuram,Tirunelveli-627011 | GSTIN: 33SSVXP5865Q1ZJ', 105, 20, { align: 'center' });
+    doc.text(`${sellerAddress} | GSTIN: ${sellerGSTIN}`, 105, 20, { align: 'center' });
 
     // Meta Block
     autoTable(doc, {
@@ -396,7 +422,7 @@ const QuotationBuilder = () => {
     const tableColumn = ["S.NO", "ITEMS", "QTY", "RATE", "Tax %", "AMOUNT"];
     const tableRows = [];
     const currentItems = typeof quoteData.items === 'string' ? JSON.parse(quoteData.items) : (quoteData.items || []);
-    
+
     currentItems.forEach((item, index) => {
       const amt = item.qty * item.rate;
       const combinedTax = (item.cgst_pct || 0) + (item.sgst_pct || 0);
@@ -471,7 +497,7 @@ const QuotationBuilder = () => {
       theme: 'grid',
       styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 1 },
       body: [
-        [{ content: 'Bank Details', styles: { fontStyle: 'bold'} }, { content: 'Payment QR Code', styles: { fontStyle: 'bold' } }],
+        [{ content: 'Bank Details', styles: { fontStyle: 'bold' } }, { content: 'Payment QR Code', styles: { fontStyle: 'bold' } }],
         [
           { content: `Name: Sathya R\nIFSC Code: IOBA0002711\nA/C No: 271101000008129\nBank Name: Indian Overseas Bank, Krishnapuram, Tirunelveli` },
           { content: `UPI ID: 8807270873@ibl`, styles: { minCellHeight: 25 } }
@@ -488,7 +514,7 @@ const QuotationBuilder = () => {
       theme: 'grid',
       styles: { fontSize: 7, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
       body: [
-        [{ content: 'Terms and Condition', styles: { fontStyle: 'bold'} }, { content: `Authorized Signatory For ${appName}`, styles: { fontStyle: 'bold', halign: 'center' } }],
+        [{ content: 'Terms and Condition', styles: { fontStyle: 'bold' } }, { content: `Authorized Signatory For ${appName}`, styles: { fontStyle: 'bold', halign: 'center' } }],
         [
           { content: `Payment Terms: 50% advance along with purchase order and 50% before dispatch.\nDelivery Period: 30 working days from the date of advance payment confirmation.\nGST: GST will be charged extra as applicable (CGST + SGST / IGST).\nTransportation: Transportation charges will be extra at actuals.\nWarranty: 6 months warranty on motor against manufacturing defects (excluding wear & tear parts).\nCancellation: Advance payment is non-refundable once production is started.\nForce Majeure: Delivery may be delayed due to circumstances beyond our control.\nJurisdiction: All disputes are subject to Chennai jurisdiction only. Damage or Shortage Of Good in Transit.` },
           { content: `\n\n\n\nSathya R,\n${appName}`, styles: { halign: 'center', valign: 'bottom' } }
@@ -620,7 +646,7 @@ const QuotationBuilder = () => {
                 {itemErrors.rate && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '4px' }}>{itemErrors.rate}</span>}
               </div>
             </div>
-            
+
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">CGST (%) <span style={{ color: 'var(--danger)' }}>*</span></label>

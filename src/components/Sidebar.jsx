@@ -8,7 +8,8 @@ import {
   ChevronRight,
   LayoutDashboard,
   LogOut,
-  Settings
+  Settings,
+  Tag
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useAppContext } from '../context/AppContext';
@@ -30,6 +31,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isMobile, isMobileSidebarOpen, s
 
   const adminMenu = [
     { icon: <Users size={22} />, label: 'Customer', path: '/customers' },
+    { icon: <Tag size={22} />, label: 'Category', path: '/categories' },
     { icon: <Package size={22} />, label: 'Product', path: '/products' },
     { icon: <FileText size={22} />, label: 'Quotation', path: '/quotations' },
     { icon: <Receipt size={22} />, label: 'Invoice', path: '/invoices' },

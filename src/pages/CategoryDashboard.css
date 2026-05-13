@@ -1,0 +1,66 @@
+/* Reuse common patterns from other dashboard CSS files */
+.category-table .name-col { flex: 2; display: flex; align-items: center; }
+.category-table .status-col { flex: 1; display: flex; align-items: center; justify-content: center; }
+.category-table .date-col { flex: 1.5; display: flex; align-items: center; justify-content: center; }
+.category-table .actions-col { flex: 1; display: flex; align-items: center; justify-content: center; min-width: 100px; }
+
+.category-row {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.category-table-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  background: var(--input-bg);
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.status-tag {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.status-tag.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-tag.inactive {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.icon-btn.edit-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.icon-btn.edit-btn:hover {
+  background: var(--primary-navy);
+  color: white;
+  border-color: var(--primary-navy);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Ensure pagination container has proper spacing */
+.pagination-container {
+  margin-top: 32px;
+  padding-bottom: 24px;
+}

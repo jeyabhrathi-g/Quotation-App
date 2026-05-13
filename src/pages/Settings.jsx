@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Palette, Settings as SettingsIcon, Save, X } from 'lucide-react';
+import { UserPlus, Palette, Settings as SettingsIcon, Save, X, Building2, MapPin, CreditCard, Phone, Mail, Info } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useSearch } from '../components/Layout';
 import { supabase } from '../supabaseClient';
@@ -13,11 +13,107 @@ const Settings = () => {
   const [userForm, setUserForm] = useState({ username: '', password: '', role: 'Admin' });
   const [isAddingUser, setIsAddingUser] = useState(false);
 
+  const [companySettings, setCompanySettings] = useState({
+    company_name: '',
+    address: '',
+    gstin: '',
+    phone: '',
+    email: ''
+  });
+  const [isSavingCompany, setIsSavingCompany] = useState(false);
+  const [isLoadingCompany, setIsLoadingCompany] = useState(true);
+  const [companyError, setCompanyError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
+
   const { setPageTitle } = useSearch();
 
   React.useEffect(() => {
     setPageTitle({ main: 'System Preferences', sub: 'Manage global application configurations' });
+    fetchCompanySettings();
   }, [setPageTitle]);
+
+  const fetchCompanySettings = async () => {
+    try {
+      setIsLoadingCompany(true);
+      const { data, error } = await supabase
+        .from('company_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) {
+        setCompanySettings(data);
+      }
+    } catch (err) {
+      console.error('Error fetching company settings:', err);
+    } finally {
+      setIsLoadingCompany(false);
+    }
+  };
+
+  const validateCompanyForm = () => {
+    const errors = {};
+    const { company_name, gstin, phone, email } = companySettings;
+
+    if (!company_name.trim()) errors.company_name = 'Company Name is required';
+
+    // GSTIN Validation (15 chars)
+    if (gstin && gstin.length !== 15) {
+      errors.gstin = 'Invalid GST Number (Must be 15 characters)';
+    }
+
+    // Phone Validation (10 digits only)
+    if (phone && !/^\d{10}$/.test(phone)) {
+      errors.phone = 'Phone number must contain exactly 10 digits';
+    }
+
+    // Email Validation (Gmail only as requested)
+    if (email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+      errors.email = 'Enter valid Gmail address';
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSaveCompanySettings = async (e) => {
+    e.preventDefault();
+    
+    if (!validateCompanyForm()) {
+      return;
+    }
+
+    setIsSavingCompany(true);
+    setCompanyError('');
+
+    try {
+      const { data: existing } = await supabase
+        .from('company_settings')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      let result;
+      if (existing) {
+        result = await supabase
+          .from('company_settings')
+          .update(companySettings)
+          .eq('id', existing.id);
+      } else {
+        result = await supabase
+          .from('company_settings')
+          .insert([companySettings]);
+      }
+
+      if (result.error) throw result.error;
+      alert('Company details updated successfully!');
+    } catch (err) {
+      setCompanyError(err.message);
+    } finally {
+      setIsSavingCompany(false);
+    }
+  };
 
   // --- App Name Handlers ---
   const handleSaveAppName = () => {
@@ -48,16 +144,16 @@ const Settings = () => {
 
     try {
       setIsAddingUser(true);
-      
+
       // 1. Check if username already exists
       const { data: existingUser, error: fetchError } = await supabase
         .from('users')
         .select('*')
         .eq('user_name', userForm.username)
         .maybeSingle();
-      
+
       if (fetchError) throw fetchError;
-      
+
       if (existingUser) {
         alert('This username is already taken!');
         setIsAddingUser(false);
@@ -80,7 +176,7 @@ const Settings = () => {
 
     } catch (err) {
       console.error('Error adding user:', err);
-      
+
       // Specifically catch Supabase RLS issues and provide clear instructions
       if (err.message?.includes('row-level security')) {
         alert("Action Required: Supabase is blocking this action.\n\nTo fix this: Go to your Supabase Dashboard -> Table Editor -> 'users' table -> Click 'Add RLS Policy' or disable Row Level Security (RLS) entirely for the users table.");
@@ -106,15 +202,15 @@ const Settings = () => {
 
       <div className="settings-grid">
         {/* App Configuration Block */}
-        <section className="settings-card app-config-card">
+        <section className="settings-card">
           <div className="settings-card-header">
             <h3 className="card-title">App Configuration</h3>
           </div>
           <div className="settings-card-body">
             <div className="setting-group">
               <label>Application Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={localAppName}
                 onChange={(e) => setLocalAppName(e.target.value)}
                 placeholder="Enter app name"
@@ -122,18 +218,18 @@ const Settings = () => {
               />
               <span className="helper-text">Currently live as: <strong>{appName}</strong></span>
             </div>
-            
+
             <div className="settings-actions-inline">
-              <button 
-                className="btn-cancel" 
-                onClick={handleCancelAppName} 
+              <button
+                className="btn-cancel"
+                onClick={handleCancelAppName}
                 disabled={localAppName === appName}
               >
                 <X size={16} /> Cancel
               </button>
-              <button 
-                className="btn-primary" 
-                onClick={handleSaveAppName} 
+              <button
+                className="btn-primary"
+                onClick={handleSaveAppName}
                 disabled={localAppName === appName || isSavingApp}
               >
                 <Save size={16} /> {isSavingApp ? 'Saving...' : 'Save Changes'}
@@ -143,19 +239,19 @@ const Settings = () => {
         </section>
 
         {/* Theme Configuration Block */}
-        <section className="settings-card theme-config-card">
+        <section className="settings-card">
           <div className="settings-card-header">
             <h3 className="card-title">Theme Preferences</h3>
           </div>
           <div className="settings-card-body">
             <div className="theme-toggle-container">
-              <button 
+              <button
                 className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
                 onClick={() => handleThemeChange('light')}
               >
                 <span className="theme-icon">🌞</span> Light Mode
               </button>
-              <button 
+              <button
                 className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
                 onClick={() => handleThemeChange('dark')}
               >
@@ -166,7 +262,7 @@ const Settings = () => {
         </section>
 
         {/* User Management Block */}
-        <section className="settings-card user-config-card">
+        <section className="settings-card">
           <div className="settings-card-header">
             <h3 className="card-title">User Management (Add New User)</h3>
           </div>
@@ -174,48 +270,154 @@ const Settings = () => {
             <form onSubmit={handleAddUser} className="user-add-form">
               <div className="setting-group">
                 <label>Username</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   placeholder="e.g. janesmith123"
                   className="settings-input"
                   value={userForm.username}
-                  onChange={(e) => setUserForm({...userForm, username: e.target.value})}
+                  onChange={(e) => setUserForm({ ...userForm, username: e.target.value })}
                 />
               </div>
 
               <div className="setting-group">
                 <label>Password</label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   required
                   placeholder="Enter strong password"
                   className="settings-input"
                   value={userForm.password}
-                  onChange={(e) => setUserForm({...userForm, password: e.target.value})}
+                  onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
                 />
               </div>
 
               <div className="setting-group">
                 <label>Role</label>
-                <select 
+                <select
                   className="settings-input select-input"
                   value={userForm.role}
-                  onChange={(e) => setUserForm({...userForm, role: e.target.value})}
+                  onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
                 >
                   <option value="Admin">Admin</option>
                 </select>
               </div>
 
-              <button 
-                type="submit" 
-                className="btn-primary user-submit-btn" 
+              <button
+                type="submit"
+                className="btn-primary user-submit-btn"
                 disabled={isAddingUser}
               >
                 <UserPlus size={18} />
                 {isAddingUser ? 'Adding...' : 'Add User'}
               </button>
             </form>
+          </div>
+        </section>
+
+        {/* Company Configuration Block */}
+        <section className="settings-card company-config-card">
+          <div className="settings-card-header">
+            <h3 className="card-title">Company Details (PDF Header)</h3>
+          </div>
+          <div className="settings-card-body">
+            {isLoadingCompany ? (
+              <div className="loading-placeholder">Loading settings...</div>
+            ) : (
+              <form onSubmit={handleSaveCompanySettings} className="company-add-form">
+                {companyError && <div className="error-message"><Info size={14} /> {companyError}</div>}
+                
+                <div className="setting-group">
+                  <label>Company Name</label>
+                  <div className="input-with-icon-settings">
+                    <Building2 size={18} className="field-icon-settings" />
+                    <input
+                      type="text"
+                      placeholder="e.g. SSV Food Tech"
+                      className={`settings-input ${validationErrors.company_name ? 'has-error' : ''}`}
+                      value={companySettings.company_name}
+                      onChange={(e) => setCompanySettings({ ...companySettings, company_name: e.target.value })}
+                    />
+                  </div>
+                  {validationErrors.company_name && <span className="field-error-text">{validationErrors.company_name}</span>}
+                </div>
+
+                <div className="setting-group">
+                  <label>Business Address</label>
+                  <div className="input-with-icon-settings">
+                    <MapPin size={18} className="field-icon-settings" />
+                    <textarea
+                      placeholder="Enter full address..."
+                      className="settings-input"
+                      rows="4"
+                      style={{ paddingLeft: '48px', paddingTop: '16px' }}
+                      value={companySettings.address}
+                      onChange={(e) => setCompanySettings({ ...companySettings, address: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="setting-group">
+                  <label>GSTIN Number</label>
+                  <div className="input-with-icon-settings">
+                    <CreditCard size={18} className="field-icon-settings" />
+                    <input
+                      type="text"
+                      placeholder="33XXXXXXXXXXXXX"
+                      maxLength={15}
+                      className={`settings-input ${validationErrors.gstin ? 'has-error' : ''}`}
+                      value={companySettings.gstin}
+                      onChange={(e) => setCompanySettings({ ...companySettings, gstin: e.target.value.toUpperCase() })}
+                    />
+                  </div>
+                  {validationErrors.gstin && <span className="field-error-text">{validationErrors.gstin}</span>}
+                </div>
+
+                <div className="setting-group">
+                  <label>Phone Number</label>
+                  <div className="input-with-icon-settings">
+                    <Phone size={18} className="field-icon-settings" />
+                    <input
+                      type="tel"
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      className={`settings-input ${validationErrors.phone ? 'has-error' : ''}`}
+                      value={companySettings.phone}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, ''); // Digits only
+                        setCompanySettings({ ...companySettings, phone: val });
+                      }}
+                    />
+                  </div>
+                  {validationErrors.phone && <span className="field-error-text">{validationErrors.phone}</span>}
+                </div>
+
+                <div className="setting-group">
+                  <label>Email Address</label>
+                  <div className="input-with-icon-settings">
+                    <Mail size={18} className="field-icon-settings" />
+                    <input
+                      type="email"
+                      placeholder="yourname@gmail.com"
+                      className={`settings-input ${validationErrors.email ? 'has-error' : ''}`}
+                      value={companySettings.email}
+                      onChange={(e) => setCompanySettings({ ...companySettings, email: e.target.value.toLowerCase() })}
+                    />
+                  </div>
+                  {validationErrors.email && <span className="field-error-text">{validationErrors.email}</span>}
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={isSavingCompany}
+                  style={{ marginTop: '12px' }}
+                >
+                  <Save size={18} />
+                  {isSavingCompany ? 'Updating...' : 'Save Company Details'}
+                </button>
+              </form>
+            )}
           </div>
         </section>
 

@@ -45,13 +45,25 @@ const numberToWords = (num) => {
 export const generateInvoicePDF = async (invoiceData, customerData) => {
   const appName = localStorage.getItem('ssv_app_name') || 'SSV Food Tech';
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pageW = doc.internal.pageSize.getWidth();
-  const L = 10; // left margin
-  const R = 10; // right margin
+  const PAGE_W = doc.internal.pageSize.getWidth(); // 210
+  const MARGIN = 10;
+  const SAFE_W = PAGE_W - (MARGIN * 2); // 190
+  
   const items = typeof invoiceData.items === 'string' ? JSON.parse(invoiceData.items) : (invoiceData.items || []);
 
-  // Safe number formatter — avoids unicode non-breaking spaces from en-IN locale
+  // Column Widths for Items Table (Sum = 190)
+  const COL_W = {
+    SL: 12,
+    NAME: 85,
+    QTY: 18,
+    RATE: 25,
+    GST: 18,
+    AMT: 32
+  };
+
+  // Safe number formatter
   const fmt = (n, dec = 2) => {
+    if (n === null || n === undefined) return '0.00';
     const fixed = parseFloat(n).toFixed(dec);
     const [int, frac] = fixed.split('.');
     const intFmt = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -59,16 +71,39 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
   };
 
   // ── HEADER ──────────────────────────────────────────────────────────────────
-  doc.setFontSize(13);
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('Tax Invoice', pageW / 2, 12, { align: 'center' });
+  doc.text('Tax Invoice', PAGE_W / 2, 12, { align: 'center' });
 
   doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
-  doc.text('ORIGINAL FOR RECIPIENT', pageW - 10, 10, { align: 'right' });
+  doc.setTextColor(100);
+  doc.text('ORIGINAL FOR RECIPIENT', PAGE_W - MARGIN, 10, { align: 'right' });
+  doc.setTextColor(0);
 
-  // ── SELLER + META BLOCK (3-column: 90 | 55 | auto — must match buyer block) ──
+  // ── SELLER + META BLOCK ─────────────────────────────────────────────────────
+  // 1. Fetch Company Settings (Dynamic vs Fallback)
+  let sellerName = appName;
+  let sellerAddress = "1/145A, Sarogini Nagar, Kalaikoil Nagar,\nKrishnapuram, Tirunelveli - 627011";
+  let sellerGSTIN = "33SGXPS5865Q1ZJ";
+  let sellerPhone = "88072 70873";
+  let sellerEmail = "";
+
+  try {
+    const { data: settings } = await supabase.from('company_settings').select('*').limit(1).maybeSingle();
+    if (settings) {
+      if (settings.company_name) sellerName = settings.company_name;
+      if (settings.address)      sellerAddress = settings.address;
+      if (settings.gstin)        sellerGSTIN = settings.gstin;
+      if (settings.phone)        sellerPhone = settings.phone;
+      if (settings.email)        sellerEmail = settings.email;
+    }
+  } catch (err) {
+    console.error('Error fetching company settings for PDF:', err);
+  }
+
   const fmtDate = (d) => {
+    if (!d) return '-';
     const date = new Date(d);
     const dd = String(date.getDate()).padStart(2, '0');
     const mon = date.toLocaleString('en-GB', { month: 'short' });
@@ -77,39 +112,41 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
   };
 
   const invoiceDate = fmtDate(invoiceData.invoice_date || invoiceData.created_at);
-  const COL1 = 90; // shared width — MUST stay identical in buyer block below
-  const COL2 = 55;
+  
+  // Split 190mm into 90 | 50 | 50
+  const C1 = 90;
+  const C2 = 50;
+  const C3 = 50;
 
   autoTable(doc, {
     startY: 16,
-    margin: { left: L, right: R },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
-    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2 },
+    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15, cellPadding: 2 },
     body: [
       [
         {
-          content: `${appName}\n1/145A, Sarogini Nagar, Kalaikoil Nagar,\nKrishnapuram, Tirunelveli - 627011\nGSTIN: 33SGXPS5865Q1ZJ\nState Name : Tamil Nadu, Code : 627011\nContact : 88072 70873`,
+          content: `${sellerName}\n${sellerAddress}\nGSTIN: ${sellerGSTIN}\nState Name : Tamil Nadu, Code : 33\nContact : ${sellerPhone}${sellerEmail ? '\nEmail : ' + sellerEmail : ''}`,
           rowSpan: 3,
-          styles: { fontStyle: 'bold', cellWidth: COL1, valign: 'top' }
+          styles: { fontStyle: 'bold', cellWidth: C1, valign: 'top' }
         },
-        { content: 'Invoice No.', styles: { fontStyle: 'bold', cellWidth: COL2 } },
-        { content: 'Dated', styles: { fontStyle: 'bold' } },
+        { content: 'Invoice No.', styles: { fontStyle: 'bold', cellWidth: C2 } },
+        { content: 'Dated', styles: { fontStyle: 'bold', cellWidth: C3 } },
       ],
       [
-        { content: invoiceData.invoice_no || '', styles: { fontStyle: 'bold', cellWidth: COL2 } },
+        { content: invoiceData.invoice_no || '', styles: { fontStyle: 'bold', textColor: [30, 64, 175] } },
         { content: invoiceDate },
       ],
       [
-        { content: 'Delivery Note', styles: { cellWidth: COL2 } },
-        { content: 'Mode/Terms of Payment' },
+        { content: 'Delivery Note', styles: { cellWidth: C2 } },
+        { content: 'Mode/Terms of Payment', styles: { cellWidth: C3 } },
       ],
     ],
   });
 
   let currY = doc.lastAutoTable.finalY;
 
-  // ── BUYER BLOCK (3-column: 90 | 55 | auto — same as seller block above) ──────
-  // Build buyer lines — show GST only if available (DB field is gst_number)
+  // ── BUYER BLOCK (3-column: 90 | 50 | 50) ───────────────────────────────────
   const buyerLines = [];
   if (customerData?.name)         buyerLines.push(customerData.name);
   if (customerData?.address)      buyerLines.push(customerData.address);
@@ -119,31 +156,31 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
 
   autoTable(doc, {
     startY: currY,
-    margin: { left: L, right: R },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
-    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2 },
+    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15, cellPadding: 2 },
     body: [
       [
-        { content: 'Buyer (Bill to)', styles: { fontStyle: 'bold', cellWidth: COL1 } },
-        { content: "Buyer's Order No.", styles: { cellWidth: COL2 } },
-        { content: 'Dated' },
+        { content: 'Buyer (Bill to)', styles: { fontStyle: 'bold', cellWidth: C1 } },
+        { content: "Buyer's Order No.", styles: { cellWidth: C2 } },
+        { content: 'Dated', styles: { cellWidth: C3 } },
       ],
       [
         {
           content: buyerLines.join('\n'),
-          styles: { minCellHeight: 22, cellWidth: COL1, fontStyle: 'bold' },
+          styles: { minCellHeight: 22, cellWidth: C1, fontStyle: 'bold', valign: 'top' },
         },
-        { content: 'Dispatch Doc No.', styles: { cellWidth: COL2 } },
-        { content: 'Delivery Note Date' },
+        { content: 'Dispatch Doc No.', styles: { cellWidth: C2 } },
+        { content: 'Delivery Note Date', styles: { cellWidth: C3 } },
       ],
       [
-        { content: '', styles: { cellWidth: COL1 } },
-        { content: 'Dispatched through', styles: { cellWidth: COL2 } },
-        { content: 'Destination' },
+        { content: '', styles: { cellWidth: C1 } },
+        { content: 'Dispatched through', styles: { cellWidth: C2 } },
+        { content: 'Destination', styles: { cellWidth: C3 } },
       ],
       [
-        { content: '', styles: { cellWidth: COL1 } },
-        { content: 'Terms of Delivery', colSpan: 2, styles: { minCellHeight: 12 } },
+        { content: '', styles: { cellWidth: C1 } },
+        { content: 'Terms of Delivery', colSpan: 2, styles: { minCellHeight: 12, valign: 'top' } },
       ],
     ],
   });
@@ -173,12 +210,12 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     totalQty += qty;
 
     itemRows.push([
-      { content: String(index + 1), styles: { halign: 'center', fontStyle: 'bold' } },
+      { content: String(index + 1), styles: { halign: 'center' } },
       { content: productName, styles: { fontStyle: 'bold' } },
       { content: qty.toString(), styles: { halign: 'center' } },
-      { content: `₹${fmt(rate, 2)}`, styles: { halign: 'right' } },
+      { content: fmt(rate, 2), styles: { halign: 'right' } },
       { content: `${(Number(item.cgst_pct) || 0) + (Number(item.sgst_pct) || 0)}%`, styles: { halign: 'center' } },
-      { content: `₹${fmt(rowTotal)}`, styles: { halign: 'right' } }
+      { content: fmt(rowTotal), styles: { halign: 'right' } }
     ]);
   });
 
@@ -186,7 +223,7 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
 
   autoTable(doc, {
     startY: currY,
-    margin: { left: 10, right: 10 },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
     head: [[
       { content: 'SI No.', styles: { halign: 'center' } },
@@ -194,103 +231,92 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
       { content: 'Qty', styles: { halign: 'center' } },
       { content: 'Rate', styles: { halign: 'center' } },
       { content: 'GST', styles: { halign: 'center' } },
-      { content: 'Amount', styles: { halign: 'right' } }
+      { content: 'Amount', styles: { halign: 'center' } }
     ]],
     body: itemRows,
     styles: {
       fontSize: 8,
-      textColor: [17, 24, 39],
-      lineColor: [148, 163, 184],
+      textColor: [0, 0, 0],
+      lineColor: [0, 0, 0],
       lineWidth: 0.15,
-      cellPadding: 3,
+      cellPadding: 2,
       minCellHeight: 8,
+      valign: 'middle'
     },
     headStyles: {
-      fillColor: [241, 245, 249],
-      textColor: [17, 24, 39],
+      fillColor: [240, 240, 240],
+      textColor: [0, 0, 0],
       fontStyle: 'bold',
-      lineColor: [148, 163, 184],
-      lineWidth: 0.3,
+      lineColor: [0, 0, 0],
+      lineWidth: 0.15,
     },
     columnStyles: {
-      0: { cellWidth: 14 },
-      1: { cellWidth: 88 },
-      2: { cellWidth: 18, halign: 'center' },
-      3: { cellWidth: 24, halign: 'right' },
-      4: { cellWidth: 18, halign: 'center' },
-      5: { cellWidth: 'auto', halign: 'right' }
+      0: { cellWidth: COL_W.SL },
+      1: { cellWidth: COL_W.NAME, overflow: 'linebreak' },
+      2: { cellWidth: COL_W.QTY },
+      3: { cellWidth: COL_W.RATE },
+      4: { cellWidth: COL_W.GST },
+      5: { cellWidth: COL_W.AMT }
     }
   });
 
-  currY = doc.lastAutoTable.finalY + 4;
+  currY = doc.lastAutoTable.finalY;
+
+  // ── TOTALS SECTION ─────────────────────────────────────────────────────────
+  const labelWidth = SAFE_W - COL_W.AMT; // 158mm
+  const valueWidth = COL_W.AMT; // 32mm
 
   autoTable(doc, {
     startY: currY,
-    margin: { left: 10, right: 10 },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
-    styles: { fontSize: 8, textColor: [17, 24, 39], lineColor: [148, 163, 184], lineWidth: 0.15, cellPadding: 3 },
+    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15, cellPadding: 2 },
     body: [
       [
-        { content: 'Subtotal', styles: { halign: 'right', fontStyle: 'bold', cellWidth: 138 } },
-        { content: `₹${fmt(taxableTotal)}`, styles: { halign: 'right' } }
+        { content: 'Subtotal', styles: { halign: 'right', fontStyle: 'bold', cellWidth: labelWidth } },
+        { content: fmt(taxableTotal), styles: { halign: 'right', cellWidth: valueWidth } }
       ],
       [
         { content: 'CGST Total', styles: { halign: 'right', fontStyle: 'bold' } },
-        { content: `₹${fmt(cgstTotal)}`, styles: { halign: 'right' } }
+        { content: fmt(cgstTotal), styles: { halign: 'right' } }
       ],
       [
         { content: 'SGST Total', styles: { halign: 'right', fontStyle: 'bold' } },
-        { content: `₹${fmt(sgstTotal)}`, styles: { halign: 'right' } }
+        { content: fmt(sgstTotal), styles: { halign: 'right' } }
       ],
       ...(discountValue ? [[
         { content: 'Discount', styles: { halign: 'right', fontStyle: 'bold' } },
-        { content: `- ₹${fmt(discountValue)}`, styles: { halign: 'right' } }
+        { content: `- ${fmt(discountValue)}`, styles: { halign: 'right' } }
       ]] : []),
       [
-        { content: 'Grand Total', styles: { halign: 'right', fontStyle: 'bold', cellWidth: 138, fillColor: [241, 245, 249] } },
-        { content: `₹${fmt(grandTotal)}`, styles: { halign: 'right', fontStyle: 'bold', fillColor: [241, 245, 249] } }
+        { content: 'Grand Total', styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } },
+        { content: fmt(grandTotal), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 240, 240] } }
       ]
     ],
-    columnStyles: { 0: { cellWidth: 138 }, 1: { cellWidth: 40, halign: 'right' } }
   });
 
+  // ── AMOUNT IN WORDS ─────────────────────────────────────────────────────────
   currY = doc.lastAutoTable.finalY;
 
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('E. & O.E', pageW - 10, doc.lastAutoTable.finalY - 2, { align: 'right' });
-
-  currY = doc.lastAutoTable.finalY;
-
-  // E. & O.E note
-  doc.setFontSize(7);
-  doc.setFont('helvetica', 'normal');
-  doc.text('E. & O.E', 200, doc.lastAutoTable.finalY - 2, { align: 'right' });
-
-  // Amount Chargeable (no separate Grand Total table - it's in last item row already)
-  // Amount in Words
-  currY = doc.lastAutoTable.finalY;
-
-  // Amount in Words
   autoTable(doc, {
     startY: currY,
-    margin: { left: 10, right: 10 },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
-    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2 },
+    styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15, cellPadding: 2 },
     body: [
-      [{ content: 'Amount Chargeable (in words)', styles: { fontStyle: 'normal', fontSize: 7.5 } }],
-      [{ content: numberToWords(grandTotal), styles: { fontStyle: 'bold', fontSize: 9 } }]
+      [{ content: 'Amount Chargeable (in words)', styles: { fontStyle: 'normal', fontSize: 7 } }],
+      [{ content: numberToWords(grandTotal), styles: { fontStyle: 'bold', fontSize: 8.5 } }]
     ]
   });
 
   currY = doc.lastAutoTable.finalY + 2;
 
-  // Tax Summary - matching reference image exactly
+  // ── TAX SUMMARY (HSN) ──────────────────────────────────────────────────────
   autoTable(doc, {
     startY: currY,
-    margin: { left: 10, right: 10 },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
-    styles: { fontSize: 7.5, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 1.5 },
+    styles: { fontSize: 7.5, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15, cellPadding: 1.5 },
     head: [
       [
         { content: 'HSN/SAC', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
@@ -308,54 +334,58 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     ],
     body: [
       ...items.map(item => {
-        const base = item.qty * item.rate;
+        const base = (Number(item.qty) || 0) * (Number(item.rate) || 0);
         return [
           { content: '7222', styles: { halign: 'center' } },
-          { content: base.toFixed(2), styles: { halign: 'right' } },
+          { content: fmt(base), styles: { halign: 'right' } },
           { content: `${item.cgst_pct}%`, styles: { halign: 'center' } },
-          { content: (base * item.cgst_pct / 100).toFixed(2), styles: { halign: 'right' } },
+          { content: fmt(base * item.cgst_pct / 100), styles: { halign: 'right' } },
           { content: `${item.sgst_pct}%`, styles: { halign: 'center' } },
-          { content: (base * item.sgst_pct / 100).toFixed(2), styles: { halign: 'right' } },
-          { content: (base * (item.cgst_pct + item.sgst_pct) / 100).toFixed(2), styles: { halign: 'right' } }
+          { content: fmt(base * item.sgst_pct / 100), styles: { halign: 'right' } },
+          { content: fmt(base * (item.cgst_pct + item.sgst_pct) / 100), styles: { halign: 'right' } }
         ];
       }),
       [
         { content: 'Total', styles: { fontStyle: 'bold', halign: 'right' } },
-        { content: taxableTotal.toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } },
+        { content: fmt(taxableTotal), styles: { fontStyle: 'bold', halign: 'right' } },
         '',
-        { content: cgstTotal.toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } },
+        { content: fmt(cgstTotal), styles: { fontStyle: 'bold', halign: 'right' } },
         '',
-        { content: sgstTotal.toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } },
-        { content: (cgstTotal + sgstTotal).toFixed(2), styles: { fontStyle: 'bold', halign: 'right' } }
+        { content: fmt(sgstTotal), styles: { fontStyle: 'bold', halign: 'right' } },
+        { content: fmt(cgstTotal + sgstTotal), styles: { fontStyle: 'bold', halign: 'right' } }
       ]
     ],
-    headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+    headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold', textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15 },
     columnStyles: {
-      0: { cellWidth: 22 }, 1: { cellWidth: 28 }, 2: { cellWidth: 18 },
-      3: { cellWidth: 22 }, 4: { cellWidth: 18 }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' }
+      0: { cellWidth: 25, halign: 'center' },
+      1: { cellWidth: 30, halign: 'right' },
+      2: { cellWidth: 20, halign: 'center' },
+      3: { cellWidth: 25, halign: 'right' },
+      4: { cellWidth: 20, halign: 'center' },
+      5: { cellWidth: 25, halign: 'right' },
+      6: { cellWidth: 'auto', halign: 'right' }
     }
   });
 
-  currY = doc.lastAutoTable.finalY + 2;
+  currY = doc.lastAutoTable.finalY + 1;
 
-  // Tax in words
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Tax Amount (in words) :  ${numberToWords(cgstTotal + sgstTotal)}`, 10, currY + 5);
+  doc.text(`Tax Amount (in words) :  ${numberToWords(cgstTotal + sgstTotal)}`, MARGIN, currY + 4);
 
-  currY += 14;
+  currY += 8;
 
-  // Declaration + Bank Details
+  // ── DECLARATION + BANK DETAILS ──────────────────────────────────────────────
   autoTable(doc, {
     startY: currY,
-    margin: { left: 10, right: 10 },
+    margin: { left: MARGIN, right: MARGIN },
     theme: 'grid',
-    styles: { fontSize: 7.5, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2 },
+    styles: { fontSize: 7.5, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.15, cellPadding: 2 },
     body: [
       [
         {
           content: `Declaration\nWe declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.`,
-          styles: { cellWidth: 95, valign: 'top', textColor: [0, 0, 180] }
+          styles: { cellWidth: 95, valign: 'top', textColor: [0, 0, 150] }
         },
         {
           content: `Company's Bank Details\nBank Name  :  Indian Overseas Bank\nA/c No.          :  271101000008129\nBranch & IFS Code  :  Krishnapuram & IOBA0002711`,
@@ -363,21 +393,21 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
         }
       ],
       [
-        { content: `Customer's Seal and Signature`, styles: { cellWidth: 95, minCellHeight: 22, valign: 'top' } },
+        { content: `Customer's Seal and Signature`, styles: { cellWidth: 95, minCellHeight: 18, valign: 'top' } },
         {
-          content: `for ${appName}\n\n\n\n\nAuthorised Signatory`,
-          styles: { cellWidth: 'auto', halign: 'right', valign: 'bottom', minCellHeight: 22 }
+          content: `for ${appName}\n\n\n\nAuthorised Signatory`,
+          styles: { cellWidth: 'auto', halign: 'right', valign: 'bottom', minCellHeight: 18 }
         }
       ]
     ]
   });
 
-  currY = doc.lastAutoTable.finalY + 4;
+  currY = doc.lastAutoTable.finalY + 5;
   doc.setFontSize(8);
   doc.setFont('helvetica', 'italic');
-  doc.setTextColor(0, 0, 180);
-  doc.text('This is a Computer Generated Invoice', 105, currY, { align: 'center' });
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(0, 0, 150);
+  doc.text('This is a Computer Generated Invoice', PAGE_W / 2, currY, { align: 'center' });
+  doc.setTextColor(0);
 
   // ── UPLOAD PDF TO SUPABASE ───────────────────────────────────────────────────
   const pdfBytes = new Uint8Array(doc.output('arraybuffer'));

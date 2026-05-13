@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Tag, Box, Info, Edit2, Trash2, IndianRupee, Cpu, Zap, Layers, Percent } from 'lucide-react';
+import { ArrowLeft, Package, Tag, Box, Info, Edit2, Trash2, IndianRupee, Cpu, Zap, Layers, Percent, CheckCircle } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import ProductModal from '../components/ProductModal';
 import { sentenceCase } from '../utils/stringUtils';
@@ -136,6 +136,16 @@ const ProductDetails = () => {
                   {(product?.gst ?? product?.GST) != null && (product?.gst ?? product?.GST) !== '' 
                     ? `${product.gst ?? product.GST}% GST` 
                     : 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            <div className="info-item">
+              <div className="info-icon"><CheckCircle size={20} /></div>
+              <div className="info-text">
+                <span className="info-label">Product Status</span>
+                <span className={`status-badge ${product?.status?.toLowerCase() === 'inactive' ? 'danger' : 'success'}`} style={{ width: 'fit-content' }}>
+                  {product?.status || 'Active'}
                 </span>
               </div>
             </div>
