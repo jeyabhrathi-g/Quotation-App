@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Tag, Search, Edit2, Trash2, Plus, Info } from 'lucide-react';
+import { Tag, Search, Trash2, Plus, Info } from 'lucide-react';
 import './CategoryDashboard.css';
 import '../pages/CustomerDashboard.css'; // Reuse table patterns
 import { supabase } from '../supabaseClient';
@@ -103,7 +103,6 @@ const CategoryDashboard = () => {
             <div className="col name-col">CATEGORY NAME</div>
             <div className="col status-col">STATUS</div>
             <div className="col date-col">CREATED AT</div>
-            <div className="col actions-col" style={{ textAlign: 'center' }}>ACTIONS</div>
           </div>
 
           {loading ? (
@@ -114,12 +113,12 @@ const CategoryDashboard = () => {
             <div className="table-body">
               {visibleCategories.map((category) => (
                 <div key={category.id} className="table-row category-row">
-                  <div className="col name-col" data-label="Category Name">
+                  <div className="col name-col" data-label="Category Name" onClick={() => handleEditCategory(category)} style={{ cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ padding: '8px', background: 'var(--input-bg)', borderRadius: '8px', color: 'var(--primary-navy)' }}>
                         <Tag size={18} />
                       </div>
-                      <span className="product-name-bold">{sentenceCase(category.category_name)}</span>
+                      <span className="product-name-bold clickable">{sentenceCase(category.category_name)}</span>
                     </div>
                   </div>
 
@@ -133,12 +132,6 @@ const CategoryDashboard = () => {
                     <span className="specs-text">
                       {new Date(category.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
-                  </div>
-
-                  <div className="col actions-col" data-label="Actions" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <button className="icon-btn edit-btn" title="Edit Category" onClick={() => handleEditCategory(category)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                      <Edit2 size={18} />
-                    </button>
                   </div>
                 </div>
               ))}

@@ -59,8 +59,17 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Ensure pagination container has proper spacing */
-.pagination-container {
-  margin-top: 32px;
-  padding-bottom: 24px;
+/* Clickable text styling */
+.clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
+
+.clickable:hover {
+  color: var(--primary-navy);
+  text-decoration: underline;
+}
+
+/* Removed unused edit button styling */
+/* .icon-btn.edit-btn { ... } */
+/* .icon-btn.edit-btn:hover { ... } */

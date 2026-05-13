@@ -83,8 +83,8 @@ const QuotationBuilder = () => {
           setDraftDesc(getProductName(firstItem));
           setDraftQty(firstItem.qty || 1);
           setDraftRate(firstItem.rate || '');
-          setDraftCgst(firstItem.cgst_pct || 9);
-          setDraftSgst(firstItem.sgst_pct || 9);
+          setDraftCgst(firstItem.cgst_pct ?? 0);
+          setDraftSgst(firstItem.sgst_pct ?? 0);
         }
       }
     } catch (e) {
@@ -136,9 +136,9 @@ const QuotationBuilder = () => {
 
     const prod = products.find(p => p.id === pId);
     if (prod) {
-      // Logic: If product has GST -> split it. If GST is missing/empty -> default to 9 + 9.
+      // Logic: If product has GST -> split it. If GST is missing/empty -> default to 0.
       const rawGst = prod.gst ?? prod.GST;
-      const productGst = (rawGst !== null && rawGst !== undefined && rawGst !== '') ? Number(rawGst) : 18; 
+      const productGst = (rawGst !== null && rawGst !== undefined && rawGst !== '') ? Number(rawGst) : 0;
       
       const gstHalf = productGst / 2;
       setDraftRate(prod.rate || 0);
@@ -195,8 +195,8 @@ const QuotationBuilder = () => {
     setDraftDesc(getProductName(item));
     setDraftQty(item.qty || 1);
     setDraftRate(item.rate || '');
-    setDraftCgst(item.cgst_pct ?? 9);
-    setDraftSgst(item.sgst_pct ?? 9);
+    setDraftCgst(item.cgst_pct ?? 0);
+    setDraftSgst(item.sgst_pct ?? 0);
 
     const product = products.find(p => p.id === item.product_id);
     if (product) {

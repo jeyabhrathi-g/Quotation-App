@@ -166,21 +166,6 @@ const ProductModal = ({ isOpen, product, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label>Product Status <span className="required">*</span></label>
-              <div className="input-with-icon">
-                <Info size={18} className="field-icon" />
-                <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  required
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
               <label>Product Name <span className="required">*</span></label>
               <div className="input-with-icon">
                 <ShoppingBag size={18} className="field-icon" />
@@ -289,6 +274,21 @@ const ProductModal = ({ isOpen, product, onClose }) => {
                   onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
                   rows="3"
                 />
+              </div>
+            </div>
+
+            <div className="form-group full-width">
+              <label>Status <span className="required">*</span></label>
+              <div className="input-with-icon">
+                <Info size={18} className="field-icon" />
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  required
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
               </div>
             </div>
           </div>
