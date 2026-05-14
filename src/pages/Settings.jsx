@@ -35,15 +35,28 @@ const Settings = () => {
   const fetchCompanySettings = async () => {
     try {
       setIsLoadingCompany(true);
-      const { data, error } = await supabase
+      const { data: companyData, error: companyError } = await supabase
         .from('company_settings')
         .select('*')
         .limit(1)
         .maybeSingle();
 
-      if (error) throw error;
-      if (data) {
-        setCompanySettings(data);
+      if (companyError) throw companyError;
+      
+      if (companyData) {
+        // Fetch address from separate table linked by shop_id
+        const { data: addressData, error: addressError } = await supabase
+          .from('addresses')
+          .select('address')
+          .eq('shop_id', companyData.id)
+          .maybeSingle();
+
+        if (addressError) console.error('Error fetching address:', addressError);
+
+        setCompanySettings({
+          ...companyData,
+          address: addressData ? addressData.address : ''
+        });
       }
     } catch (err) {
       console.error('Error fetching company settings:', err);
@@ -79,7 +92,7 @@ const Settings = () => {
 
   const handleSaveCompanySettings = async (e) => {
     e.preventDefault();
-    
+
     if (!validateCompanyForm()) {
       return;
     }
@@ -94,20 +107,57 @@ const Settings = () => {
         .limit(1)
         .maybeSingle();
 
-      let result;
+      let companyId;
+      // Separate address from other company settings for separate table storage
+      const { address, ...settingsWithoutAddress } = companySettings;
+
       if (existing) {
-        result = await supabase
+        const { error } = await supabase
           .from('company_settings')
-          .update(companySettings)
+          .update(settingsWithoutAddress)
           .eq('id', existing.id);
+        
+        if (error) throw error;
+        companyId = existing.id;
       } else {
-        result = await supabase
+        const { data, error } = await supabase
           .from('company_settings')
-          .insert([companySettings]);
+          .insert([settingsWithoutAddress])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        companyId = data.id;
       }
 
-      if (result.error) throw result.error;
-      alert('Company details updated successfully!');
+      // Handle the separate address table
+      const { data: existingAddress } = await supabase
+        .from('addresses')
+        .select('id')
+        .eq('shop_id', companyId)
+        .maybeSingle();
+
+      if (existingAddress) {
+        const { error: addressUpdateError } = await supabase
+          .from('addresses')
+          .update({ 
+            address: address 
+          })
+          .eq('id', existingAddress.id);
+        
+        if (addressUpdateError) throw addressUpdateError;
+      } else {
+        const { error: addressInsertError } = await supabase
+          .from('addresses')
+          .insert([{ 
+            shop_id: companyId, 
+            address: address 
+          }]);
+        
+        if (addressInsertError) throw addressInsertError;
+      }
+
+      alert('Company details and address updated successfully!');
     } catch (err) {
       setCompanyError(err.message);
     } finally {
@@ -326,7 +376,7 @@ const Settings = () => {
             ) : (
               <form onSubmit={handleSaveCompanySettings} className="company-add-form">
                 {companyError && <div className="error-message"><Info size={14} /> {companyError}</div>}
-                
+
                 <div className="setting-group">
                   <label>Company Name</label>
                   <div className="input-with-icon-settings">

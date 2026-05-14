@@ -19,22 +19,22 @@
       "items"
     ],
     "sample": {
-      "id": "fca65a60-1fba-433e-b1a0-cc2aaa898716",
-      "customer_id": "e79fa440-51b0-40ef-875a-a326073cd0da",
-      "total": 165.2,
-      "status": "Closed",
-      "created_at": "2026-03-20T08:03:47.074314+00:00",
-      "quotation_no": "SSV-03-26-Q016",
-      "qty": null,
-      "rate": null,
-      "cgst": 9,
-      "sgst": 9,
+      "id": "b6f91d7d-e152-41f2-bdc5-e4ed50454f0d",
+      "customer_id": "b503be54-1f8d-40ce-a432-478ba0f2ef15",
+      "total": 1416,
+      "status": "Draft",
+      "created_at": "2026-03-29T13:25:05.299239+00:00",
+      "quotation_no": "Draft001",
+      "qty": 1,
+      "rate": 1200,
+      "cgst": 108,
+      "sgst": 108,
       "discount": 0,
-      "quotation_date": "2026-03-20",
-      "expiry_date": "2026-04-04",
-      "product_id": null,
+      "quotation_date": "2026-03-29",
+      "expiry_date": "2026-04-13",
+      "product_id": "feb2e93d-712e-47ec-93de-dc064fa9880b",
       "pdf_url": null,
-      "items": "[{\"desc\":\"Testing - test\",\"qty\":1,\"rate\":140,\"amount\":140}]"
+      "items": "[{\"id\":\"1774790703871\",\"product_id\":\"feb2e93d-712e-47ec-93de-dc064fa9880b\",\"desc\":\"10L - \",\"qty\":1,\"rate\":1200,\"cgst_pct\":9,\"sgst_pct\":9}]"
     }
   },
   "quotation_items": {
@@ -51,19 +51,23 @@
       "rpm",
       "steel",
       "Description",
-      "energy"
+      "energy",
+      "gst",
+      "status"
     ],
     "sample": {
-      "id": "81a09f9e-1874-4239-a397-f3dc6f32149c",
-      "category": "Test\n",
-      "rate": 230,
-      "created_at": "2026-03-22T14:15:41.15705+00:00",
-      "sub_category": "Testing",
-      "phase": 12,
-      "rpm": 12,
-      "steel": "MS",
-      "Description": "testing.....",
-      "energy": "Gas"
+      "id": "5e6261a1-ca4a-44d3-adf7-55dda7027470",
+      "category": "Printing Machines",
+      "rate": 30000,
+      "created_at": "2026-05-10T15:45:28.210898+00:00",
+      "sub_category": "Digital Printing Machine",
+      "phase": 3,
+      "rpm": 1440,
+      "steel": "SS",
+      "Description": "High-performance Digital Printing Machine designed for industrial and commercial printing applications. Built with durable stainless steel body, high-speed motor, and advanced printing technology for accurate, fast, and reliable output. Suitable for label printing, packaging, banners, and multi-color printing operations.",
+      "energy": "Electric",
+      "gst": 5,
+      "status": "Active"
     }
   },
   "customers": {
@@ -77,25 +81,27 @@
       "gst_number"
     ],
     "sample": {
-      "id": "47c4787a-32e1-4568-add7-ad51de8b802d",
-      "name": "JEYA BHARATHI G",
-      "email": "gsjeyabharathi@gmail.com",
-      "phone": "1234124131",
-      "created_at": "2026-03-16T06:04:06.993693+00:00",
-      "address": "1/53, North Street\nKaruvantha",
-      "gst_number": null
+      "id": "49a3a174-e601-47a0-82e2-ea3cf29609fb",
+      "name": "werty",
+      "email": "indialifeof@gmail.com",
+      "phone": "2342345678",
+      "created_at": "2026-04-02T05:42:38.524583+00:00",
+      "address": "wert",
+      "gst_number": ""
     }
   },
   "category": {
     "columns": [
       "id",
       "created_at",
-      "category_name"
+      "category_name",
+      "status"
     ],
     "sample": {
-      "id": 14,
-      "created_at": "2026-03-29T05:48:26.303392+00:00",
-      "category_name": "Test\n"
+      "id": 16,
+      "created_at": "2026-03-29T13:23:48.578026+00:00",
+      "category_name": "Mixer",
+      "status": "Active"
     }
   }
 }

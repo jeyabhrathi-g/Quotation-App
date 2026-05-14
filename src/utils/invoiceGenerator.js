@@ -93,10 +93,23 @@ export const generateInvoicePDF = async (invoiceData, customerData) => {
     const { data: settings } = await supabase.from('company_settings').select('*').limit(1).maybeSingle();
     if (settings) {
       if (settings.company_name) sellerName = settings.company_name;
-      if (settings.address)      sellerAddress = settings.address;
       if (settings.gstin)        sellerGSTIN = settings.gstin;
       if (settings.phone)        sellerPhone = settings.phone;
       if (settings.email)        sellerEmail = settings.email;
+
+      // Fetch address from separate addresses table
+      const { data: addressData } = await supabase
+        .from('addresses')
+        .select('address')
+        .eq('shop_id', settings.id)
+        .maybeSingle();
+      
+      if (addressData && addressData.address) {
+        sellerAddress = addressData.address;
+      } else if (settings.address) {
+        // Fallback to old field if new table is empty
+        sellerAddress = settings.address;
+      }
     }
   } catch (err) {
     console.error('Error fetching company settings for PDF:', err);
