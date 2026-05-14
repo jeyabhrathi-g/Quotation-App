@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UserPlus, Palette, Settings as SettingsIcon, Save, X, Building2, MapPin, CreditCard, Phone, Mail, Info } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useSearch } from '../components/Layout';
+import { useToast } from '../components/ToastProvider';
 import { supabase } from '../supabaseClient';
 import './Settings.css';
 
@@ -9,6 +10,7 @@ const Settings = () => {
   const { appName, setAppName, theme, setTheme } = useAppContext();
   const [localAppName, setLocalAppName] = useState(appName);
   const [isSavingApp, setIsSavingApp] = useState(false);
+  const { addToast } = useToast();
 
   const [userForm, setUserForm] = useState({ username: '', password: '', role: 'Admin' });
   const [isAddingUser, setIsAddingUser] = useState(false);
@@ -69,7 +71,7 @@ const Settings = () => {
     const errors = {};
     const { company_name, gstin, phone, email } = companySettings;
 
-    if (!company_name.trim()) errors.company_name = 'Company Name is required';
+    if (!company_name.trim()) errors.company_name = 'Business Name is required';
 
     // GSTIN Validation (15 chars)
     if (gstin && gstin.length !== 15) {
@@ -157,7 +159,7 @@ const Settings = () => {
         if (addressInsertError) throw addressInsertError;
       }
 
-      alert('Company details and address updated successfully!');
+      addToast({ message: 'Updated successfully', type: 'success' });
     } catch (err) {
       setCompanyError(err.message);
     } finally {
@@ -171,7 +173,7 @@ const Settings = () => {
     setTimeout(() => {
       setAppName(localAppName);
       setIsSavingApp(false);
-      alert('App Name updated successfully!');
+      addToast({ message: 'Updated successfully', type: 'success' });
     }, 400); // Simulate tiny network delay feeling
   };
 
@@ -378,7 +380,7 @@ const Settings = () => {
                 {companyError && <div className="error-message"><Info size={14} /> {companyError}</div>}
 
                 <div className="setting-group">
-                  <label>Company Name</label>
+                  <label>Business Name</label>
                   <div className="input-with-icon-settings">
                     <Building2 size={18} className="field-icon-settings" />
                     <input

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Tag, Search, Trash2, Plus, Info } from 'lucide-react';
+import { Tag, Search, Trash2, Plus, Info, Edit2 } from 'lucide-react';
 import './CategoryDashboard.css';
 import '../pages/CustomerDashboard.css'; // Reuse table patterns
 import { supabase } from '../supabaseClient';
@@ -103,6 +103,7 @@ const CategoryDashboard = () => {
             <div className="col name-col">CATEGORY NAME</div>
             <div className="col status-col">STATUS</div>
             <div className="col date-col">CREATED AT</div>
+            <div className="col actions-col">ACTION</div>
           </div>
 
           {loading ? (
@@ -132,6 +133,17 @@ const CategoryDashboard = () => {
                     <span className="specs-text">
                       {new Date(category.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
+                  </div>
+
+                  <div className="col actions-col" data-label="Action">
+                    <button
+                      type="button"
+                      className="icon-btn edit-btn"
+                      aria-label={`Edit ${category.category_name}`}
+                      onClick={() => handleEditCategory(category)}
+                    >
+                      <Edit2 size={18} />
+                    </button>
                   </div>
                 </div>
               ))}

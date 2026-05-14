@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Tag, Info, Cpu, Recycle, Zap, HardDrive } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { sentenceCase } from '../utils/stringUtils';
+import { useToast } from './ToastProvider';
 import './CustomerModal.css'; // Reuse form patterns
 
 const ProductModal = ({ isOpen, product, onClose }) => {
@@ -20,6 +21,7 @@ const ProductModal = ({ isOpen, product, onClose }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { addToast } = useToast();
 
   useEffect(() => {
     fetchCategories();
@@ -110,11 +112,13 @@ const ProductModal = ({ isOpen, product, onClose }) => {
           .update(dataToSubmit)
           .eq('id', product.id);
         if (error) throw error;
+        addToast({ message: 'Updated successfully', type: 'success' });
       } else {
         const { error } = await supabase
           .from('products')
           .insert([dataToSubmit]);
         if (error) throw error;
+        addToast({ message: 'Product created successfully', type: 'success' });
       }
       onClose();
     } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Tag, Info } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { useToast } from './ToastProvider';
 import './CustomerModal.css'; // Reuse form patterns
 
 const CategoryModal = ({ isOpen, category, onClose, onCategoryUpdated }) => {
@@ -8,6 +9,7 @@ const CategoryModal = ({ isOpen, category, onClose, onCategoryUpdated }) => {
   const [status, setStatus] = useState('Active');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { addToast } = useToast();
 
   useEffect(() => {
     if (category) {
@@ -54,6 +56,10 @@ const CategoryModal = ({ isOpen, category, onClose, onCategoryUpdated }) => {
       if (result.error) throw result.error;
       
       onCategoryUpdated(result.data[0]);
+      addToast({
+        message: category ? 'Updated successfully' : 'Category created successfully',
+        type: 'success'
+      });
       onClose();
       setCategoryName('');
       setStatus('Active');

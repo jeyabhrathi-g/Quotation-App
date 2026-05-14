@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Edit, Plus, FileText, CheckCircle, Trash2, List } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { useAppContext } from '../context/AppContext';
+import { useToast } from '../components/ToastProvider';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { sentenceCase } from '../utils/stringUtils';
@@ -41,6 +42,7 @@ const QuotationBuilder = () => {
   const [loading, setLoading] = useState(false);
 
   const [formErrors, setFormErrors] = useState({});
+  const { addToast } = useToast();
   const [itemErrors, setItemErrors] = useState({});
 
   const getProductName = (item) => {
@@ -176,7 +178,23 @@ const QuotationBuilder = () => {
       setItems(items.map(i => i.id === editingItemId ? itemPayload : i));
       setEditingItemId(null);
     } else {
-      setItems([...items, itemPayload]);
+      const existingItem = items.find(i => i.product_id === draftProduct);
+      if (existingItem) {
+        setItems(items.map(i =>
+          i.product_id === draftProduct
+            ? {
+                ...i,
+                qty: i.qty + Number(draftQty),
+                rate: Number(draftRate),
+                cgst_pct: Number(draftCgst),
+                sgst_pct: Number(draftSgst),
+                desc: draftDesc
+              }
+            : i
+        ));
+      } else {
+        setItems([...items, itemPayload]);
+      }
     }
 
     // Reset Add Item Box
@@ -308,6 +326,11 @@ const QuotationBuilder = () => {
         await generateAndUploadPDF(dbRes.data);
       }
 
+      addToast({
+        message: id ? 'Updated successfully' : 'Quotation created successfully',
+        type: 'success'
+      });
+
       // Navigate only after everything is done
       navigate('/quotations');
     } catch (err) {
@@ -338,7 +361,11 @@ const QuotationBuilder = () => {
   };
 
   const generateAndUploadPDF = async (quoteData) => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const PAGE_WIDTH = doc.internal.pageSize.getWidth();
+    const PAGE_HEIGHT = doc.internal.pageSize.getHeight();
+    const MARGIN = 10;
+    const TABLE_WIDTH = PAGE_WIDTH - MARGIN * 2;
 
     // Header
     // 1. Fetch Company Settings (Dynamic vs Fallback)
@@ -380,20 +407,25 @@ const QuotationBuilder = () => {
     // Meta Block
     autoTable(doc, {
       startY: 28,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       theme: 'grid',
       styles: {
         fontSize: 9,
         cellPadding: 2,
         textColor: [0, 0, 0],
         lineColor: [0, 0, 0],
-        lineWidth: 0.2
+        lineWidth: 0.2,
+        valign: 'middle'
       },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
       head: [['Quotation No:', quoteData.quotation_no, 'Quotation Date:', new Date(quoteData.quotation_date).toLocaleDateString('en-GB'), 'Expiry Date:', new Date(quoteData.expiry_date).toLocaleDateString('en-GB')]],
       headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold' },
       columnStyles: {
         0: { fontStyle: 'bold', cellWidth: 25 }, 1: { cellWidth: 35 },
         2: { fontStyle: 'bold', cellWidth: 28 }, 3: { cellWidth: 35 },
-        4: { fontStyle: 'bold', cellWidth: 25 }, 5: { cellWidth: 'auto' },
+        4: { fontStyle: 'bold', cellWidth: 25 }, 5: { cellWidth: TABLE_WIDTH - 148 },
       }
     });
 
@@ -402,8 +434,12 @@ const QuotationBuilder = () => {
     // Buyer Grids — show GST number only if available
     autoTable(doc, {
       startY: currY1,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       theme: 'grid',
-      styles: { fontSize: 9, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2 },
+      styles: { fontSize: 9, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2, valign: 'top' },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
       body: [
         [{ content: 'BILL TO', styles: { fontStyle: 'bold' } }, { content: 'SHIP TO', styles: { fontStyle: 'bold' } }],
         [
@@ -426,7 +462,7 @@ const QuotationBuilder = () => {
           }
         ]
       ],
-      columnStyles: { 0: { cellWidth: '50%' }, 1: { cellWidth: '50%' } }
+      columnStyles: { 0: { cellWidth: TABLE_WIDTH / 2 }, 1: { cellWidth: TABLE_WIDTH / 2 } }
     });
 
     let currY = doc.lastAutoTable.finalY + 2;
@@ -454,18 +490,37 @@ const QuotationBuilder = () => {
 
     autoTable(doc, {
       startY: currY,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       head: [tableColumn],
       body: tableRows,
       theme: 'grid',
-      styles: { fontSize: 9, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
-      headStyles: { fillColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' },
+      styles: {
+        fontSize: 9,
+        textColor: [0, 0, 0],
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        cellPadding: 3,
+        minCellHeight: 8,
+        valign: 'middle',
+        overflow: 'linebreak'
+      },
+      headStyles: {
+        fillColor: [245, 245, 245],
+        fontStyle: 'bold',
+        halign: 'center',
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2
+      },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
       columnStyles: {
-        0: { cellWidth: 15, halign: 'center' },
-        1: { cellWidth: 80 },
-        2: { cellWidth: 20, halign: 'center' },
-        3: { cellWidth: 25, halign: 'right' },
-        4: { cellWidth: 20, halign: 'center' },
-        5: { cellWidth: 'auto', halign: 'right' },
+        0: { cellWidth: 16, halign: 'center' },
+        1: { cellWidth: 78, overflow: 'linebreak' },
+        2: { cellWidth: 22, halign: 'center' },
+        3: { cellWidth: 28, halign: 'right' },
+        4: { cellWidth: 24, halign: 'center' },
+        5: { cellWidth: TABLE_WIDTH - (16 + 78 + 22 + 28 + 24), halign: 'right' },
       }
     });
 
@@ -474,15 +529,35 @@ const QuotationBuilder = () => {
     // Grand total line inside table row mimicking exactly the PDF logic
     autoTable(doc, {
       startY: currY,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       theme: 'grid',
       showHead: false,
-      styles: { fontSize: 9, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+      styles: {
+        fontSize: 9,
+        textColor: [0, 0, 0],
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        cellPadding: 3,
+        minCellHeight: 8,
+        valign: 'middle'
+      },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
+      columnStyles: {
+        0: { cellWidth: 16 },
+        1: { cellWidth: 78 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 24 },
+        5: { cellWidth: TABLE_WIDTH - (16 + 78 + 22 + 28 + 24) }
+      },
       body: [
         [
-          { content: '', styles: { cellWidth: 15, lineWidth: 0 } },
-          { content: '', styles: { cellWidth: 80, lineWidth: 0 } },
-          { content: '', styles: { cellWidth: 20, lineWidth: 0 } },
-          { content: '', styles: { cellWidth: 25, lineWidth: 0 } },
+          { content: '' },
+          { content: '' },
+          { content: '' },
+          { content: '' },
           { content: 'Grand Total', styles: { fontStyle: 'bold', halign: 'center' } },
           { content: `${Math.round(quoteData.total)}`, styles: { fontStyle: 'bold', halign: 'right' } }
         ]
@@ -494,8 +569,19 @@ const QuotationBuilder = () => {
     // Total Words Box
     autoTable(doc, {
       startY: currY,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       theme: 'grid',
-      styles: { fontSize: 9, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+      styles: {
+        fontSize: 9,
+        textColor: [0, 0, 0],
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        cellPadding: 3,
+        valign: 'middle'
+      },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
       body: [
         [{ content: 'Total Amount In Words:', styles: { fontStyle: 'bold' } }],
         [{ content: getNumberInWords(quoteData.total) }]
@@ -507,8 +593,12 @@ const QuotationBuilder = () => {
     // Layout Footer 2-Col
     autoTable(doc, {
       startY: currY,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       theme: 'grid',
-      styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 1 },
+      styles: { fontSize: 8, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2, valign: 'top' },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
       body: [
         [{ content: 'Bank Details', styles: { fontStyle: 'bold' } }, { content: 'Payment QR Code', styles: { fontStyle: 'bold' } }],
         [
@@ -516,7 +606,7 @@ const QuotationBuilder = () => {
           { content: `UPI ID: 8807270873@ibl`, styles: { minCellHeight: 25 } }
         ]
       ],
-      columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 'auto' } }
+      columnStyles: { 0: { cellWidth: TABLE_WIDTH * 0.6 }, 1: { cellWidth: TABLE_WIDTH * 0.4 } }
     });
 
     currY = doc.lastAutoTable.finalY;
@@ -524,16 +614,20 @@ const QuotationBuilder = () => {
     // Terms
     autoTable(doc, {
       startY: currY,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: TABLE_WIDTH,
       theme: 'grid',
-      styles: { fontSize: 7, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+      styles: { fontSize: 7, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 2, valign: 'top' },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.2,
       body: [
         [{ content: 'Terms and Condition', styles: { fontStyle: 'bold' } }, { content: `Authorized Signatory For ${appName}`, styles: { fontStyle: 'bold', halign: 'center' } }],
         [
-          { content: `Payment Terms: 50% advance along with purchase order and 50% before dispatch.\nDelivery Period: 30 working days from the date of advance payment confirmation.\nGST: GST will be charged extra as applicable (CGST + SGST / IGST).\nTransportation: Transportation charges will be extra at actuals.\nWarranty: 6 months warranty on motor against manufacturing defects (excluding wear & tear parts).\nCancellation: Advance payment is non-refundable once production is started.\nForce Majeure: Delivery may be delayed due to circumstances beyond our control.\nJurisdiction: All disputes are subject to Chennai jurisdiction only. Damage or Shortage Of Good in Transit.` },
-          { content: `\n\n\n\nSathya R,\n${appName}`, styles: { halign: 'center', valign: 'bottom' } }
+          { content: `Payment Terms: 50% advance along with purchase order and 50% before dispatch.\nDelivery Period: 30 working days from the date of advance payment confirmation.\nGST: GST will be charged extra as applicable (CGST + SGST / IGST).\nTransportation: Transportation charges will be extra at actuals.\nWarranty: 6 months warranty on motor against manufacturing defects (excluding wear & tear parts).\nCancellation: Advance payment is non-refundable once production is started.\nForce Majeure: Delivery may be delayed due to circumstances beyond our control.\nJurisdiction: All disputes are subject to Chennai jurisdiction only. Damage or Shortage Of Good in Transit.`, styles: { cellWidth: TABLE_WIDTH * 0.6 } },
+          { content: `\n\n\n\nSathya R,\n${appName}`, styles: { halign: 'center', valign: 'bottom', cellWidth: TABLE_WIDTH * 0.4 } }
         ]
       ],
-      columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 'auto' } }
+      columnStyles: { 0: { cellWidth: TABLE_WIDTH * 0.6 }, 1: { cellWidth: TABLE_WIDTH * 0.4 } }
     });
 
     // Handle File Storage & Download
